@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0F1C2E;
+  --teal: #00C9B1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0F1C2E;
+  color: white;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-teal-400 text-navy-200 font-semibold px-6 py-3 rounded-xl hover:bg-teal-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white/10 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/20 transition-all duration-200 border border-white/10;
+  }
+
+  .btn-danger {
+    @apply bg-red-500/20 text-red-300 font-semibold px-6 py-3 rounded-xl hover:bg-red-500/30 transition-all duration-200 border border-red-500/20;
+  }
+
+  .card {
+    @apply bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm;
+  }
+
+  .card-hover {
+    @apply card hover:bg-white/10 hover:border-teal-400/30 transition-all duration-200 cursor-pointer;
+  }
+
+  .input {
+    @apply bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/30 transition-all duration-200 w-full;
+  }
+
+  .label {
+    @apply text-sm font-medium text-white/70 mb-2 block;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .section-header {
+    @apply text-2xl font-bold text-white mb-1;
+  }
+
+  .section-subheader {
+    @apply text-white/50 text-sm mb-6;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-teal-400 to-teal-200 bg-clip-text text-transparent;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 20px;
+  }
+}
+
+/* Typing animation for AI */
+.typing-indicator span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00C9B1;
+  animation: typing-bounce 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Progress bar animation */
+@keyframes progress-fill {
+  from { width: 0; }
+}
+
+.progress-bar {
+  animation: progress-fill 1s ease-out forwards;
+}
+
+/* Custom scrollbar for chat */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,201,177,0.2) transparent;
+}
