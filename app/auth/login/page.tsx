@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Zap, Chrome } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 function LoginForm() {
@@ -16,8 +16,6 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -31,23 +29,6 @@ function LoginForm() {
       toast.error(err.message || 'Login failed')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true)
-    try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
-        },
-      })
-      if (error) throw error
-    } catch (err: any) {
-      toast.error(err.message || 'Google login failed')
-      setGoogleLoading(false)
     }
   }
 
@@ -94,24 +75,6 @@ function LoginForm() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-navy-50 px-3 text-white/40">or continue with</span>
-            </div>
-          </div>
-
-          <Button
-            variant="secondary"
-            onClick={handleGoogleLogin}
-            loading={googleLoading}
-            className="w-full"
-            icon={<Chrome className="w-4 h-4" />}
-          >
-            Google
-          </Button>
         </div>
 
         <p className="text-center text-white/50 text-sm mt-6">

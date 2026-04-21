@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Zap, Chrome, CheckCircle } from 'lucide-react'
+import { Zap, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function SignupPage() {
@@ -14,8 +14,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password.length < 8) {
@@ -39,23 +37,6 @@ export default function SignupPage() {
       toast.error(err.message || 'Signup failed')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleGoogleSignup = async () => {
-    setGoogleLoading(true)
-    try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirectTo=/onboarding`,
-        },
-      })
-      if (error) throw error
-    } catch (err: any) {
-      toast.error(err.message || 'Google signup failed')
-      setGoogleLoading(false)
     }
   }
 
@@ -141,24 +122,6 @@ export default function SignupPage() {
               </Button>
             </form>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-navy-50 px-3 text-white/40">or sign up with</span>
-              </div>
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={handleGoogleSignup}
-              loading={googleLoading}
-              className="w-full"
-              icon={<Chrome className="w-4 h-4" />}
-            >
-              Continue with Google
-            </Button>
           </div>
 
           <p className="text-center text-white/40 text-xs mt-4">
