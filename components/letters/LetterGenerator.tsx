@@ -8,7 +8,7 @@ import { UpgradeModal } from '@/components/UpgradeModal'
 import { cn, formatDate } from '@/lib/utils'
 import {
   FileText, Sparkles, Download, Copy, CheckCheck,
-  ChevronRight, Eye, Zap,
+  ChevronRight, Eye, Zap, Mail,
   Scale, Ban, Heart, CreditCard, Shield,
   UserX, Clock, Flag, DollarSign, Trash2, Hospital, Skull
 } from 'lucide-react'
@@ -250,6 +250,24 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
     }
   }
 
+  const [emailing, setEmailing] = useState(false)
+  const emailLetter = async (text: string, title: string) => {
+    setEmailing(true)
+    try {
+      const res = await fetch('/api/email-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ letterContent: text, letterTitle: title }),
+      })
+      if (!res.ok) throw new Error('Failed to send')
+      toast.success('Letter emailed to you!')
+    } catch {
+      toast.error('Failed to send email')
+    } finally {
+      setEmailing(false)
+    }
+  }
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="mb-4">
@@ -382,6 +400,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={() => copyLetter(generatedLetter)} icon={copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}>{copied ? 'Copied' : 'Copy'}</Button>
                   <Button variant="secondary" size="sm" onClick={() => downloadLetter(generatedLetter, letterType, creditorName)} icon={<Download className="w-3.5 h-3.5" />}>PDF</Button>
+                  <Button variant="secondary" size="sm" loading={emailing} onClick={() => emailLetter(generatedLetter, currentLetterDef?.label || letterType)} icon={<Mail className="w-3.5 h-3.5" />}>Email Me</Button>
                 </div>
               )}
             </div>
@@ -454,6 +473,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
                         <button onClick={() => setViewingLetter(letter)} className="text-white/30 hover:text-teal-400 transition-colors"><Eye className="w-4 h-4" /></button>
                         <button onClick={() => copyLetter(letter.content)} className="text-white/30 hover:text-teal-400 transition-colors"><Copy className="w-4 h-4" /></button>
                         <button onClick={() => downloadLetter(letter.content, letter.letter_type, letter.creditor_name)} className="text-white/30 hover:text-teal-400 transition-colors"><Download className="w-4 h-4" /></button>
+                        <button onClick={() => emailLetter(letter.content, letter.creditor_name)} className="text-white/30 hover:text-teal-400 transition-colors"><Mail className="w-4 h-4" /></button>
                       </div>
                     </div>
                     <p className="text-white/25 text-xs line-clamp-2">{letter.content.substring(0, 120)}...</p>
@@ -473,6 +493,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
             <div className="flex gap-3 mt-4 pt-4 border-t border-white/10">
               <Button onClick={() => copyLetter(viewingLetter.content)} variant="secondary" size="sm" icon={<Copy className="w-4 h-4" />}>Copy</Button>
               <Button onClick={() => downloadLetter(viewingLetter.content, viewingLetter.letter_type, viewingLetter.creditor_name)} size="sm" icon={<Download className="w-4 h-4" />}>Download PDF</Button>
+              <Button onClick={() => emailLetter(viewingLetter.content, viewingLetter.creditor_name)} variant="secondary" size="sm" loading={emailing} icon={<Mail className="w-4 h-4" />}>Email Me</Button>
             </div>
           </div>
         )}
