@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { safeError } from '@/lib/validation'
 
+interface UserRow {
+  id: string
+  email: string
+  full_name: string
+  plan: string
+  state: string
+  created_at: string
+  stripe_customer_id: string | null
+  onboarding_completed: boolean | null
+}
+
+interface CountRow {
+  user_id: string
+}
+
 function isAdmin(email: string | undefined) {
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
   return email && adminEmails.includes(email.toLowerCase())
@@ -32,22 +47,24 @@ export async function GET(req: NextRequest) {
     if (search) query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`)
     if (plan) query = query.eq('plan', plan)
 
-    const { data: users, count, error } = await query
+    const { data: usersRaw, count, error } = await query
     if (error) throw error
 
+    const users = (usersRaw || []) as UserRow[]
+
     // For each user, get letter/debt counts in parallel (batch of IDs)
-    const ids = (users || []).map(u => u.id)
+    const ids = users.map((u: UserRow) => u.id)
     const [lettersRes, debtsRes] = await Promise.all([
-      ids.length ? admin.from('letters').select('user_id').in('user_id', ids) : Promise.resolve({ data: [] }),
-      ids.length ? admin.from('debts').select('user_id').in('user_id', ids) : Promise.resolve({ data: [] }),
+      ids.length ? admin.from('letters').select('user_id').in('user_id', ids) : Promise.resolve({ data: [] as CountRow[] }),
+      ids.length ? admin.from('debts').select('user_id').in('user_id', ids) : Promise.resolve({ data: [] as CountRow[] }),
     ])
 
     const letterCounts: Record<string, number> = {}
     const debtCounts: Record<string, number> = {}
-    for (const l of (lettersRes.data || [])) letterCounts[l.user_id] = (letterCounts[l.user_id] || 0) + 1
-    for (const d of (debtsRes.data || [])) debtCounts[d.user_id] = (debtCounts[d.user_id] || 0) + 1
+    for (const l of ((lettersRes.data || []) as CountRow[])) letterCounts[l.user_id] = (letterCounts[l.user_id] || 0) + 1
+    for (const d of ((debtsRes.data || []) as CountRow[])) debtCounts[d.user_id] = (debtCounts[d.user_id] || 0) + 1
 
-    const enriched = (users || []).map(u => ({
+    const enriched = users.map((u: UserRow) => ({
       ...u,
       letters_count: letterCounts[u.id] || 0,
       debts_count: debtCounts[u.id] || 0,

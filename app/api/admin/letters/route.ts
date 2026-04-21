@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { safeError } from '@/lib/validation'
 
+interface LetterRow {
+  id: string
+  user_id: string
+  letter_type: string
+  creditor_name: string
+  created_at: string
+}
+
+interface UserRow {
+  id: string
+  email: string
+  full_name: string
+}
+
 function isAdmin(email: string | undefined) {
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
   return email && adminEmails.includes(email.toLowerCase())
@@ -21,7 +35,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, parseInt(searchParams.get('limit') || '50'))
     const from = (page - 1) * limit
 
-    const { data: letters, count, error } = await admin
+    const { data: lettersRaw, count, error } = await admin
       .from('letters')
       .select('id, user_id, letter_type, creditor_name, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -29,15 +43,18 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error
 
+    const letters = (lettersRaw || []) as LetterRow[]
+
     // Enrich with user emails
-    const userIds = Array.from(new Set((letters || []).map(l => l.user_id)))
+    const userIds = Array.from(new Set(letters.map((l: LetterRow) => l.user_id)))
     let userMap: Record<string, { email: string; full_name: string }> = {}
     if (userIds.length) {
-      const { data: users } = await admin.from('users').select('id, email, full_name').in('id', userIds)
-      for (const u of (users || [])) userMap[u.id] = { email: u.email, full_name: u.full_name }
+      const { data: usersRaw } = await admin.from('users').select('id, email, full_name').in('id', userIds)
+      const users = (usersRaw || []) as UserRow[]
+      for (const u of users) userMap[u.id] = { email: u.email, full_name: u.full_name }
     }
 
-    const enriched = (letters || []).map(l => ({ ...l, users: userMap[l.user_id] }))
+    const enriched = letters.map((l: LetterRow) => ({ ...l, users: userMap[l.user_id] }))
 
     return NextResponse.json({ letters: enriched, total: count || 0, page, limit })
   } catch (err) {

@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { safeError } from '@/lib/validation'
 
+interface LetterTypeRow {
+  letter_type: string
+}
+
+interface UsageRow {
+  messages_count: number | null
+  letters_count: number | null
+}
+
 function isAdmin(email: string | undefined) {
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
   return email && adminEmails.includes(email.toLowerCase())
@@ -48,12 +57,14 @@ export async function GET() {
 
     // Letter type breakdown
     const lettersByType: Record<string, number> = {}
-    for (const row of (letterTypesRes.data || [])) {
+    for (const row of ((letterTypesRes.data || []) as LetterTypeRow[])) {
       lettersByType[row.letter_type] = (lettersByType[row.letter_type] || 0) + 1
     }
 
     // Usage totals
-    const totalMessages = (usageRes.data || []).reduce((s, r) => s + (r.messages_count || 0), 0)
+    const totalMessages = ((usageRes.data || []) as UsageRow[]).reduce(
+      (s: number, r: UsageRow) => s + (r.messages_count || 0), 0
+    )
 
     return NextResponse.json({
       totalUsers: usersRes.count || 0,
