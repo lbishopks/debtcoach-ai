@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     if (error) throw error
 
     // Enrich with user emails
-    const userIds = [...new Set((letters || []).map(l => l.user_id))]
+    const userIds = Array.from(new Set((letters || []).map(l => l.user_id)))
     let userMap: Record<string, { email: string; full_name: string }> = {}
     if (userIds.length) {
       const { data: users } = await admin.from('users').select('id, email, full_name').in('id', userIds)
