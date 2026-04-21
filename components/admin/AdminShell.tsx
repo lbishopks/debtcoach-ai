@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/billing', label: 'Billing', icon: CreditCard },
   { href: '/admin/letters', label: 'Letters', icon: FileText },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export function AdminShell({ children, userEmail }: { children: React.ReactNode; userEmail: string }) {

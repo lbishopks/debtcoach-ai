@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { Search, Loader2, ChevronLeft, ChevronRight, CheckCircle, XCircle, Star } from 'lucide-react'
+import { Search, Loader2, ChevronLeft, ChevronRight, CheckCircle, XCircle, Star, ExternalLink } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
 interface User {
@@ -20,6 +21,7 @@ const PlanBadge = ({ plan }: { plan: string }) => (
 )
 
 export default function AdminUsers() {
+  const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -128,14 +130,21 @@ export default function AdminUsers() {
                     <tr><td colSpan={8} className="text-center py-12 text-white/30 text-sm">No users found</td></tr>
                   )}
                   {users.map(u => (
-                    <tr key={u.id} className="hover:bg-white/2 transition-colors">
+                    <tr
+                      key={u.id}
+                      className="hover:bg-white/2 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/admin/users/${u.id}`)}
+                    >
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/60 text-xs font-bold flex-shrink-0">
                             {(u.full_name || u.email || '?')[0].toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-white text-sm font-medium truncate max-w-[180px]">{u.full_name || '—'}</p>
+                            <p className="text-white text-sm font-medium truncate max-w-[180px] flex items-center gap-1.5">
+                              {u.full_name || '—'}
+                              <ExternalLink className="w-3 h-3 text-white/20 flex-shrink-0" />
+                            </p>
                             <p className="text-white/40 text-xs truncate max-w-[180px]">{u.email}</p>
                           </div>
                         </div>
@@ -154,7 +163,7 @@ export default function AdminUsers() {
                       </td>
                       <td className="px-5 py-3 text-right">
                         <button
-                          onClick={() => togglePlan(u.id, u.plan)}
+                          onClick={e => { e.stopPropagation(); togglePlan(u.id, u.plan) }}
                           disabled={updatingId === u.id}
                           className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
                             u.plan === 'pro'
