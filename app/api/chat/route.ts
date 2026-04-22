@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         .eq('user_id', user.id)
         .gte('date', startOfMonthStr)
 
-      currentUsageCount = (usageRows || []).reduce((s, r) => s + (r.messages_count || 0), 0)
+      currentUsageCount = (usageRows || []).reduce((s: number, r: { messages_count: number | null }) => s + (r.messages_count || 0), 0)
 
       if (currentUsageCount >= messagesLimit) {
         const limitLabel = plan === 'free' ? 'free plan' : 'your plan'
