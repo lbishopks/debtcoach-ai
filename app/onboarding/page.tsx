@@ -297,7 +297,7 @@ export default function OnboardingPage() {
               </div>
               <Input
                 label="Creditor / Collection Agency Name"
-                placeholder="e.g. Midland Credit Management"
+                placeholder="e.g. Debt collector or creditor name"
                 value={creditorName}
                 onChange={(e) => setCreditorName(e.target.value)}
               />
