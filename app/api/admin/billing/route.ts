@@ -16,6 +16,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Check if Stripe is configured
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+    const stripeConfigured = !!(stripeKey && stripeKey !== 'sk_test_placeholder' && stripeKey.startsWith('sk_'))
+    if (!stripeConfigured) {
+      return NextResponse.json({
+        mrr: 0, activeSubscriptions: 0, revenue30d: 0, recentCharges: [],
+        stripeConfigured: false,
+      })
+    }
+
     // Fetch from Stripe in parallel
     const [subsRes, chargesRes, balTxnsRes] = await Promise.all([
       stripe.subscriptions.list({ status: 'active', limit: 100, expand: ['data.items.data.price'] }),
@@ -55,6 +65,7 @@ export async function GET() {
       activeSubscriptions: subsRes.data.length,
       revenue30d: Math.round(revenue30d * 100) / 100,
       recentCharges,
+      stripeConfigured: true,
     })
   } catch (err) {
     return safeError(err, 'admin/billing')

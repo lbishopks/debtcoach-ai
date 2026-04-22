@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { DollarSign, Users, TrendingUp, Loader2, ExternalLink, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { DollarSign, Users, TrendingUp, Loader2, ExternalLink, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 
 interface Charge {
   id: string; amount: number; currency: string; status: string
@@ -8,6 +8,7 @@ interface Charge {
 }
 interface BillingData {
   mrr: number; activeSubscriptions: number; revenue30d: number; recentCharges: Charge[]
+  stripeConfigured?: boolean
 }
 
 function StatCard({ label, value, sub, icon: Icon, color = 'teal' }: {
@@ -73,6 +74,7 @@ export default function AdminBilling() {
   if (!data) return null
 
   const arr = data.mrr > 0 ? Math.round(data.mrr * 12 * 100) / 100 : 0
+  const stripeReady = data.stripeConfigured !== false
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
@@ -90,6 +92,45 @@ export default function AdminBilling() {
           Open Stripe <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
+
+      {/* Stripe not configured warning */}
+      {!stripeReady && (
+        <div className="bg-amber-400/10 border border-amber-400/20 rounded-xl p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-3">
+              <div>
+                <h3 className="text-amber-400 font-semibold text-sm">Stripe not configured — payments are disabled</h3>
+                <p className="text-white/50 text-sm mt-1">
+                  Users cannot upgrade to Pro until you add real Stripe keys to Railway. Follow these steps:
+                </p>
+              </div>
+              <ol className="text-white/50 text-sm space-y-2 list-none">
+                {[
+                  <>Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:text-teal-300 inline-flex items-center gap-1">Stripe API Keys <ExternalLink className="w-3 h-3"/></a> → copy your <strong className="text-white/70">Secret key</strong> (starts with <code className="text-teal-400">sk_live_</code> or <code className="text-teal-400">sk_test_</code>)</>,
+                  <>Create two products in Stripe: <strong className="text-white/70">Pro Monthly ($9.99/mo)</strong> and <strong className="text-white/70">Pro Yearly ($79/yr)</strong> → copy each Price ID (starts with <code className="text-teal-400">price_</code>)</>,
+                  <>Go to <a href="https://railway.com/project/fa241fac-195e-4098-8798-943293e6aa0c/service/d6460444-83fd-4ac0-85b4-63949062f87f/variables" target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:text-teal-300 inline-flex items-center gap-1">Railway Variables <ExternalLink className="w-3 h-3"/></a> and set:</>,
+                ].map((step, i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i+1}</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="bg-black/20 rounded-lg p-3 font-mono text-xs text-white/60 space-y-1">
+                <div><span className="text-teal-400">STRIPE_SECRET_KEY</span>=sk_live_...</div>
+                <div><span className="text-teal-400">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</span>=pk_live_...</div>
+                <div><span className="text-teal-400">STRIPE_PRO_MONTHLY_PRICE_ID</span>=price_...</div>
+                <div><span className="text-teal-400">STRIPE_PRO_YEARLY_PRICE_ID</span>=price_...</div>
+                <div><span className="text-teal-400">STRIPE_WEBHOOK_SECRET</span>=whsec_...</div>
+              </div>
+              <p className="text-white/30 text-xs">
+                For the webhook secret: go to Stripe → Developers → Webhooks → Add endpoint → URL: <code className="text-white/50">https://thedebtcoachai.com/api/stripe/webhook</code> → select all subscription events → copy the signing secret.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

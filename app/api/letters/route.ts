@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, LETTER_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { letterSchema, sanitize, safeNumber, safeError } from '@/lib/validation'
+import { getPlanLimits } from '@/lib/platform-settings'
 
 const LETTER_TYPE_DESCRIPTIONS: Record<string, string> = {
   dispute: 'formal debt dispute letter challenging the validity and accuracy of the debt under FDCPA § 1692g and FCRA § 1681i, demanding validation and cessation of collection activity',
@@ -49,19 +50,24 @@ export async function POST(req: NextRequest) {
     const adminClient = createAdminClient()
     const { data: profile } = await adminClient.from('users').select('plan').eq('id', user.id).single()
 
-    if (profile?.plan === 'free') {
+    const plan = profile?.plan || 'free'
+    const { lettersLimit } = await getPlanLimits(plan)
+
+    if (lettersLimit !== -1) {
       const thisMonth = new Date()
       thisMonth.setDate(1)
+      thisMonth.setHours(0, 0, 0, 0)
       const { count } = await adminClient
         .from('letters')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .gte('created_at', thisMonth.toISOString())
 
-      if ((count || 0) >= 1) {
+      if ((count || 0) >= lettersLimit) {
+        const limitLabel = plan === 'free' ? 'free plan' : 'your plan'
         return NextResponse.json({
           error: 'LIMIT_REACHED',
-          message: 'Free plan allows 1 letter per month. Upgrade to Pro for unlimited letters.',
+          message: `You've reached your ${lettersLimit} letter${lettersLimit !== 1 ? 's' : ''}/month limit on the ${limitLabel}. Upgrade to Pro for more access.`,
         }, { status: 429 })
       }
     }

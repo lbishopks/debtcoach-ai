@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { anthropic, DEBT_COACH_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { createClient } from '@/lib/supabase/server'
 import { chatSchema, safeError } from '@/lib/validation'
+import { getPlanLimits } from '@/lib/platform-settings'
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Treat temp IDs (client-generated) as new conversations
     const conversationId = rawConvId && !String(rawConvId).startsWith('temp-') ? rawConvId : null
 
-    // Check usage limits for free tier
+    // Check usage limits
     const adminClient = createAdminClient()
     const { data: profile } = await adminClient
       .from('users')
@@ -28,23 +29,30 @@ export async function POST(req: NextRequest) {
       .eq('id', user.id)
       .single()
 
+    const plan = profile?.plan || 'free'
+    const { messagesLimit } = await getPlanLimits(plan)
+
+    // Track monthly usage for all limited plans
     const today = new Date().toISOString().split('T')[0]
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    const startOfMonthStr = startOfMonth.toISOString().split('T')[0]
     let currentUsageCount = 0
 
-    if (profile?.plan === 'free') {
-      const { data: usage } = await adminClient
+    if (messagesLimit !== -1) {
+      const { data: usageRows } = await adminClient
         .from('usage_tracking')
         .select('messages_count')
         .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle()
+        .gte('date', startOfMonthStr)
 
-      currentUsageCount = usage?.messages_count || 0
+      currentUsageCount = (usageRows || []).reduce((s, r) => s + (r.messages_count || 0), 0)
 
-      if (currentUsageCount >= 3) {
+      if (currentUsageCount >= messagesLimit) {
+        const limitLabel = plan === 'free' ? 'free plan' : 'your plan'
         return NextResponse.json({
           error: 'LIMIT_REACHED',
-          message: 'You\'ve reached your 3 free messages for today. Upgrade to Pro for unlimited access.',
+          message: `You've reached your ${messagesLimit} messages/month limit on the ${limitLabel}. Upgrade to Pro for more access.`,
         }, { status: 429 })
       }
     }
@@ -107,8 +115,8 @@ export async function POST(req: NextRequest) {
           console.error('Failed to save conversation:', saveErr)
         }
 
-        // Only increment usage after a successful AI response
-        if (profile?.plan === 'free') {
+        // Increment usage after a successful AI response (for all limited plans)
+        if (messagesLimit !== -1) {
           await adminClient
             .from('usage_tracking')
             .upsert({
