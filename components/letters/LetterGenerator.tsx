@@ -1,19 +1,18 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input, Select, Textarea } from '@/components/ui/Input'
-import { Modal } from '@/components/ui/Modal'
 import { UpgradeModal } from '@/components/UpgradeModal'
 import { cn, formatDate } from '@/lib/utils'
 import {
-  FileText, Sparkles, Download, Copy, CheckCheck,
-  ChevronRight, Eye, Zap, Mail,
+  FileText, Sparkles, CheckCheck,
+  ChevronRight, Zap,
   Scale, Ban, Heart, CreditCard, Shield,
   UserX, Clock, Flag, DollarSign, Trash2, Hospital, Skull
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { downloadLetterPDF } from '@/lib/pdf'
 
 const LETTER_CATEGORIES = [
   {
@@ -173,6 +172,7 @@ interface Props {
 }
 
 export function LetterGenerator({ plan, state, debts, savedLetters: initialLetters }: Props) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate')
   const [letterType, setLetterType] = useState('validation')
   const [creditorName, setCreditorName] = useState('')
@@ -184,12 +184,9 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
   const [settlementOffer, setSettlementOffer] = useState('')
   const [contactDates, setContactDates] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
-  const [generatedLetter, setGeneratedLetter] = useState('')
   const [loading, setLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [letters, setLetters] = useState<Letter[]>(initialLetters)
-  const [viewingLetter, setViewingLetter] = useState<Letter | null>(null)
 
   const currentLetterDef = ALL_LETTERS.find(l => l.value === letterType)
 
@@ -218,10 +215,11 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
       if (res.status === 429) { setShowUpgrade(true); return }
       if (!res.ok) throw new Error('Failed to generate letter')
       const data = await res.json()
-      setGeneratedLetter(data.content)
-      toast.success('Letter generated!')
       if (data.letterId) {
-        setLetters(prev => [{ id: data.letterId, letter_type: letterType, content: data.content, creditor_name: creditorName, created_at: new Date().toISOString() }, ...prev])
+        toast.success('Letter generated — review and approve it')
+        router.push(`/letters/${data.letterId}`)
+      } else {
+        toast.error('Letter generated but could not be saved')
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to generate letter')
@@ -232,40 +230,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
     setLetterType(tpl.letterType)
     if (tpl.disputeReason) setDisputeReason(tpl.disputeReason)
     setAdditionalDetails(tpl.additionalDetails)
-    setGeneratedLetter('')
     toast.success(`Template loaded: ${tpl.label}`)
-  }
-
-  const copyLetter = (text: string) => {
-    navigator.clipboard.writeText(text); setCopied(true)
-    setTimeout(() => setCopied(false), 2000); toast.success('Copied to clipboard')
-  }
-
-  const downloadLetter = async (text: string, type: string, creditor: string) => {
-    try {
-      await downloadLetterPDF(text, type, creditor || 'letter')
-      toast.success('PDF downloaded!')
-    } catch {
-      toast.error('Failed to generate PDF')
-    }
-  }
-
-  const [emailing, setEmailing] = useState(false)
-  const emailLetter = async (text: string, title: string) => {
-    setEmailing(true)
-    try {
-      const res = await fetch('/api/email-letter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ letterContent: text, letterTitle: title }),
-      })
-      if (!res.ok) throw new Error('Failed to send')
-      toast.success('Letter emailed to you!')
-    } catch {
-      toast.error('Failed to send email')
-    } finally {
-      setEmailing(false)
-    }
   }
 
   return (
@@ -275,16 +240,10 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
         <p className="section-subheader">AI-generated letter templates — educational use only, not legal advice</p>
       </div>
 
-      {/* Prominent UPL disclaimer */}
-      <div className="mb-6 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 flex items-start gap-3">
-        <span className="text-amber-400 text-lg flex-shrink-0">⚖️</span>
-        <div>
-          <p className="text-amber-300 text-sm font-semibold mb-1">Not Legal Advice — Educational Templates Only</p>
-          <p className="text-amber-200/70 text-xs leading-relaxed">
-            DebtCoach AI is <strong>not a law firm</strong> and does not provide legal advice. These letter templates are for general educational purposes only and do not create an attorney-client relationship. Always review and verify any letter with a licensed attorney in your state before sending. Results are not guaranteed.
-          </p>
-        </div>
-      </div>
+      {/* Subtle legal note */}
+      <p className="mb-5 text-white/30 text-xs">
+        ⚖️ Educational templates only — not legal advice. Review with an attorney before sending.
+      </p>
 
       <div className="flex gap-2 mb-6 border-b border-white/10">
         {(['generate', 'history'] as const).map(tab => (
@@ -384,61 +343,27 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
             </div>
           </div>
 
-          {/* Output */}
+          {/* Output preview */}
           <div className="xl:col-span-2">
-            {/* UPL disclaimer — always visible */}
-            <div className="mb-3 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3 flex items-start gap-2.5">
-              <span className="text-amber-400 text-base flex-shrink-0">⚖️</span>
-              <div>
-                <p className="text-amber-300 text-xs font-semibold mb-0.5">AI-Generated Template — Not Legal Advice</p>
-                <p className="text-amber-200/70 text-xs leading-relaxed">DebtCoach AI is not a law firm. These letters are educational templates only and do not constitute legal advice. Review every letter with a licensed attorney before sending. Do not rely on this content as a substitute for professional legal counsel.</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-white font-semibold text-sm">Generated Letter</h3>
-              {generatedLetter && (
-                <div className="flex gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => copyLetter(generatedLetter)} icon={copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}>{copied ? 'Copied' : 'Copy'}</Button>
-                  <Button variant="secondary" size="sm" onClick={() => downloadLetter(generatedLetter, letterType, creditorName)} icon={<Download className="w-3.5 h-3.5" />}>PDF</Button>
-                  <Button variant="secondary" size="sm" loading={emailing} onClick={() => emailLetter(generatedLetter, currentLetterDef?.label || letterType)} icon={<Mail className="w-3.5 h-3.5" />}>Email Me</Button>
-                </div>
-              )}
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl min-h-[520px] p-5">
-              {!generatedLetter && !loading && (
-                <div className="flex flex-col items-center justify-center h-[420px] text-center">
+            <h3 className="text-white font-semibold text-sm mb-3">Preview</h3>
+            <div className="bg-white/5 border border-white/10 rounded-2xl min-h-[520px] p-5 flex flex-col items-center justify-center text-center">
+              {!loading ? (
+                <>
                   <FileText className="w-10 h-10 text-white/15 mb-3" />
                   <p className="text-white/30 text-sm font-medium">{currentLetterDef?.label}</p>
-                  <p className="text-white/20 text-xs mt-1 max-w-48">{currentLetterDef?.description}</p>
+                  <p className="text-white/20 text-xs mt-1 max-w-xs leading-relaxed">{currentLetterDef?.description}</p>
+                  <p className="text-white/15 text-xs mt-6 max-w-xs">
+                    After generating, you'll be taken to the letter editor where you can personalize and approve it before use.
+                  </p>
+                </>
+              ) : (
+                <div>
+                  <div className="typing-indicator flex gap-2 justify-center mb-3"><span /><span /><span /></div>
+                  <p className="text-white/40 text-sm">Generating your letter…</p>
+                  <p className="text-white/20 text-xs mt-1">You'll be redirected to review and approve it</p>
                 </div>
               )}
-              {loading && (
-                <div className="flex items-center justify-center h-[420px]">
-                  <div className="text-center">
-                    <div className="typing-indicator flex gap-2 justify-center mb-3"><span /><span /><span /></div>
-                    <p className="text-white/40 text-sm">Generating legally-compliant letter...</p>
-                  </div>
-                </div>
-              )}
-              {generatedLetter && <pre className="text-white/80 text-xs leading-relaxed whitespace-pre-wrap font-mono overflow-auto max-h-[580px] scrollbar-thin">{generatedLetter}</pre>}
             </div>
-            {generatedLetter && (
-              <div className="mt-3 space-y-2">
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
-                  <p className="text-yellow-300/80 text-xs"><strong>📮 Mail:</strong> USPS Certified Mail + Return Receipt. Fill all <strong>[BRACKETED]</strong> fields. Keep a copy + tracking number.</p>
-                </div>
-                {letterType === 'statute_of_limitations' && (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                    <p className="text-red-300/80 text-xs"><strong>⚠️ Critical:</strong> Do NOT make any payment or promise to pay — in most states this restarts the SOL clock.</p>
-                  </div>
-                )}
-                {letterType === 'debt_settlement' && (
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
-                    <p className="text-blue-300/80 text-xs"><strong>💡 Tax note:</strong> Forgiven debt over $600 may generate a 1099-C. Consult a tax advisor if you are insolvent.</p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
         </>
@@ -458,46 +383,25 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
                 const def = ALL_LETTERS.find(l => l.value === letter.letter_type)
                 const Icon = def?.icon || FileText
                 return (
-                  <div key={letter.id} className="card-hover">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-teal-400/10 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-4 h-4 text-teal-400" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium text-sm">{letter.creditor_name}</p>
-                          <p className="text-white/40 text-xs mt-0.5">{def?.label || letter.letter_type.replace(/_/g, ' ')} · {formatDate(letter.created_at)}</p>
-                        </div>
+                  <Link key={letter.id} href={`/letters/${letter.id}`} className="card-hover block group">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-teal-400/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-teal-400" />
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setViewingLetter(letter)} className="text-white/30 hover:text-teal-400 transition-colors"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => copyLetter(letter.content)} className="text-white/30 hover:text-teal-400 transition-colors"><Copy className="w-4 h-4" /></button>
-                        <button onClick={() => downloadLetter(letter.content, letter.letter_type, letter.creditor_name)} className="text-white/30 hover:text-teal-400 transition-colors"><Download className="w-4 h-4" /></button>
-                        <button onClick={() => emailLetter(letter.content, letter.creditor_name)} className="text-white/30 hover:text-teal-400 transition-colors"><Mail className="w-4 h-4" /></button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium text-sm truncate">{letter.creditor_name}</p>
+                        <p className="text-white/40 text-xs mt-0.5">{def?.label || letter.letter_type.replace(/_/g, ' ')} · {formatDate(letter.created_at)}</p>
                       </div>
+                      <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-teal-400 transition-colors flex-shrink-0 mt-0.5" />
                     </div>
-                    <p className="text-white/25 text-xs line-clamp-2">{letter.content.substring(0, 120)}...</p>
-                  </div>
+                    <p className="text-white/25 text-xs line-clamp-2">{letter.content.substring(0, 120)}…</p>
+                  </Link>
                 )
               })}
             </div>
           )}
         </div>
       )}
-
-      <Modal isOpen={!!viewingLetter} onClose={() => setViewingLetter(null)}
-        title={viewingLetter ? `${viewingLetter.creditor_name} — ${ALL_LETTERS.find(l => l.value === viewingLetter.letter_type)?.label || viewingLetter.letter_type}` : ''} size="xl">
-        {viewingLetter && (
-          <div>
-            <pre className="text-white/80 text-xs leading-relaxed whitespace-pre-wrap font-mono max-h-[60vh] overflow-auto scrollbar-thin">{viewingLetter.content}</pre>
-            <div className="flex gap-3 mt-4 pt-4 border-t border-white/10">
-              <Button onClick={() => copyLetter(viewingLetter.content)} variant="secondary" size="sm" icon={<Copy className="w-4 h-4" />}>Copy</Button>
-              <Button onClick={() => downloadLetter(viewingLetter.content, viewingLetter.letter_type, viewingLetter.creditor_name)} size="sm" icon={<Download className="w-4 h-4" />}>Download PDF</Button>
-              <Button onClick={() => emailLetter(viewingLetter.content, viewingLetter.creditor_name)} variant="secondary" size="sm" loading={emailing} icon={<Mail className="w-4 h-4" />}>Email Me</Button>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} trigger="letter" />
     </div>
