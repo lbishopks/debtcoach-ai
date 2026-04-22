@@ -35,11 +35,19 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, parseInt(searchParams.get('limit') || '50'))
     const from = (page - 1) * limit
 
-    const { data: lettersRaw, count, error } = await admin
+    const search = searchParams.get('search') || ''
+
+    let query = admin
       .from('letters')
       .select('id, user_id, letter_type, creditor_name, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, from + limit - 1)
+
+    if (search) {
+      query = query.ilike('creditor_name', `%${search}%`)
+    }
+
+    const { data: lettersRaw, count, error } = await query
 
     if (error) throw error
 
