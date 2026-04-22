@@ -71,24 +71,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-12 px-4 border-y border-white/10">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-3 gap-8 text-center">
-            {[
-              { value: '$2.3B+', label: 'Debt Managed by Users' },
-              { value: '47%', label: 'Average Settlement Reduction' },
-              { value: '12,000+', label: 'Letters Generated' },
-            ].map(stat => (
-              <div key={stat.label}>
-                <p className="text-3xl md:text-4xl font-extrabold text-teal-400 mb-1">{stat.value}</p>
-                <p className="text-white/50 text-sm">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
