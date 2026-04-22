@@ -1,18 +1,19 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input, Select, Textarea } from '@/components/ui/Input'
 import { UpgradeModal } from '@/components/UpgradeModal'
 import { cn, formatDate } from '@/lib/utils'
 import {
-  FileText, Sparkles, CheckCheck,
-  ChevronRight, Zap,
+  FileText, Sparkles, CheckCheck, CheckCircle,
+  ChevronRight, Zap, Copy, Download, Printer, Mail,
+  ExternalLink, AlertTriangle,
   Scale, Ban, Heart, CreditCard, Shield,
   UserX, Clock, Flag, DollarSign, Trash2, Hospital, Skull
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { downloadLetterPDF } from '@/lib/pdf'
 
 const LETTER_CATEGORIES = [
   {
@@ -171,8 +172,54 @@ interface Props {
   savedLetters: Letter[]
 }
 
+// ── Approval Modal ────────────────────────────────────────────────────────────
+function ApprovalModal({ onApprove, onClose }: { onApprove: () => void; onClose: () => void }) {
+  const [checks, setChecks] = useState({ own: false, reviewed: false, agreed: false })
+  const allChecked = checks.own && checks.reviewed && checks.agreed
+  const toggle = (k: keyof typeof checks) => setChecks(p => ({ ...p, [k]: !p[k] }))
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#0f1624] border border-white/12 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-6 border-b border-white/8">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 rounded-xl bg-teal-400/15 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-teal-400" />
+            </div>
+            <h2 className="text-white font-bold text-lg">Approve Your Letter</h2>
+          </div>
+          <p className="text-white/40 text-sm">Please confirm the following before finalizing.</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {[
+            { key: 'own' as const, label: 'This is my letter', detail: 'I confirm this letter was created for use in my own personal situation and will be sent under my name.' },
+            { key: 'reviewed' as const, label: 'I have reviewed and approve the content', detail: 'I have read this letter in full, made all desired edits, and approve it as ready to send.' },
+            { key: 'agreed' as const, label: 'I agree to the terms I previously accepted', detail: 'This includes the Privacy Policy. I understand DebtCoach AI is not a law firm and this letter is not legal advice.' },
+          ].map(({ key, label, detail }) => (
+            <button key={key} onClick={() => toggle(key)}
+              className={`w-full text-left flex gap-3 p-4 rounded-xl border transition-all ${checks[key] ? 'border-teal-400/40 bg-teal-400/8' : 'border-white/10 bg-white/3 hover:border-white/20'}`}>
+              <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 border transition-all ${checks[key] ? 'bg-teal-400 border-teal-400' : 'border-white/25 bg-transparent'}`}>
+                {checks[key] && <CheckCheck className="w-3 h-3 text-[#0a0f1a]" />}
+              </div>
+              <div>
+                <p className={`text-sm font-medium transition-colors ${checks[key] ? 'text-teal-300' : 'text-white/80'}`}>{label}</p>
+                <p className="text-white/35 text-xs mt-0.5 leading-relaxed">{detail}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="px-6 pb-6 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-white/6 text-white/60 hover:text-white text-sm font-medium transition-all hover:bg-white/10">Cancel</button>
+          <button onClick={onApprove} disabled={!allChecked}
+            className="flex-1 py-3 rounded-xl bg-teal-400 text-[#0a0f1a] font-bold text-sm transition-all hover:bg-teal-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <CheckCircle className="w-4 h-4" /> Approve & Finalize
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function LetterGenerator({ plan, state, debts, savedLetters: initialLetters }: Props) {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate')
   const [letterType, setLetterType] = useState('validation')
   const [creditorName, setCreditorName] = useState('')
@@ -184,6 +231,14 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
   const [settlementOffer, setSettlementOffer] = useState('')
   const [contactDates, setContactDates] = useState('')
   const [additionalDetails, setAdditionalDetails] = useState('')
+  // Letter output state
+  const [generatedLetter, setGeneratedLetter] = useState('')
+  const [letterId, setLetterId] = useState<string | null>(null)
+  const [dirty, setDirty] = useState(false)
+  const [approved, setApproved] = useState(false)
+  const [showApproval, setShowApproval] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [emailing, setEmailing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [letters, setLetters] = useState<Letter[]>(initialLetters)
@@ -205,7 +260,11 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
 
   const handleGenerate = async () => {
     if (!creditorName.trim()) { toast.error('Please enter the creditor or collector name'); return }
-    setLoading(true); setGeneratedLetter('')
+    setLoading(true)
+    setGeneratedLetter('')
+    setApproved(false)
+    setDirty(false)
+    setLetterId(null)
     try {
       const res = await fetch('/api/letters', {
         method: 'POST',
@@ -215,26 +274,72 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
       if (res.status === 429) { setShowUpgrade(true); return }
       if (!res.ok) throw new Error('Failed to generate letter')
       const data = await res.json()
+      setGeneratedLetter(data.content)
+      setLetterId(data.letterId || null)
+      toast.success('Letter generated — review and edit below')
       if (data.letterId) {
-        toast.success('Letter generated — review and approve it')
-        router.push(`/letters/${data.letterId}`)
-      } else {
-        toast.error('Letter generated but could not be saved')
+        setLetters(prev => [{ id: data.letterId, letter_type: letterType, content: data.content, creditor_name: creditorName, created_at: new Date().toISOString() }, ...prev])
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to generate letter')
     } finally { setLoading(false) }
   }
 
+  const handleApprove = () => { setApproved(true); setShowApproval(false); toast.success('Letter approved — ready to use!') }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedLetter)
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
+    toast.success('Copied to clipboard')
+  }
+
+  const handleDownload = async () => {
+    try { await downloadLetterPDF(generatedLetter, letterType, creditorName); toast.success('PDF downloaded!') }
+    catch { toast.error('Failed to generate PDF') }
+  }
+
+  const handlePrint = () => {
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${creditorName || 'Letter'}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Times New Roman',Times,serif;font-size:12pt;color:#000;background:#fff}.page{width:8.5in;min-height:11in;margin:0 auto;padding:1in}pre{white-space:pre-wrap;word-wrap:break-word;font-family:inherit;font-size:12pt;line-height:1.6}@media print{body{margin:0}.page{padding:1in;width:100%}}</style>
+</head><body><div class="page"><pre>${generatedLetter.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
+<script>window.onload=function(){window.print()}<\/script></body></html>`)
+    win.document.close()
+  }
+
+  const handleEmail = async () => {
+    setEmailing(true)
+    try {
+      const res = await fetch('/api/email-letter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ letterContent: generatedLetter, letterTitle: currentLetterDef?.label || letterType }) })
+      if (!res.ok) throw new Error()
+      toast.success('Letter emailed to you!')
+    } catch { toast.error('Failed to send email') }
+    finally { setEmailing(false) }
+  }
+
+  // Save edits back to DB
+  const handleSaveEdit = async (content: string) => {
+    if (!letterId) return
+    setGeneratedLetter(content)
+    setDirty(true)
+    setApproved(false)
+    try {
+      await fetch(`/api/letters/${letterId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) })
+    } catch { /* silent — not critical */ }
+  }
+
   const applyTemplate = (tpl: typeof QUICK_TEMPLATES[0]) => {
     setLetterType(tpl.letterType)
     if (tpl.disputeReason) setDisputeReason(tpl.disputeReason)
     setAdditionalDetails(tpl.additionalDetails)
+    setGeneratedLetter(''); setApproved(false); setLetterId(null)
     toast.success(`Template loaded: ${tpl.label}`)
   }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      {showApproval && <ApprovalModal onApprove={handleApprove} onClose={() => setShowApproval(false)} />}
       <div className="mb-4">
         <h1 className="section-header">Dispute Letter Center</h1>
         <p className="section-subheader">AI-generated letter templates — educational use only, not legal advice</p>
@@ -343,27 +448,122 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
             </div>
           </div>
 
-          {/* Output preview */}
-          <div className="xl:col-span-2">
-            <h3 className="text-white font-semibold text-sm mb-3">Preview</h3>
-            <div className="bg-white/5 border border-white/10 rounded-2xl min-h-[520px] p-5 flex flex-col items-center justify-center text-center">
-              {!loading ? (
-                <>
-                  <FileText className="w-10 h-10 text-white/15 mb-3" />
-                  <p className="text-white/30 text-sm font-medium">{currentLetterDef?.label}</p>
-                  <p className="text-white/20 text-xs mt-1 max-w-xs leading-relaxed">{currentLetterDef?.description}</p>
-                  <p className="text-white/15 text-xs mt-6 max-w-xs">
-                    After generating, you'll be taken to the letter editor where you can personalize and approve it before use.
-                  </p>
-                </>
-              ) : (
-                <div>
-                  <div className="typing-indicator flex gap-2 justify-center mb-3"><span /><span /><span /></div>
-                  <p className="text-white/40 text-sm">Generating your letter…</p>
-                  <p className="text-white/20 text-xs mt-1">You'll be redirected to review and approve it</p>
-                </div>
-              )}
+          {/* Output — inline edit + approve */}
+          <div className="xl:col-span-2 flex flex-col gap-3">
+
+            {/* Header row */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-semibold text-sm">
+                {generatedLetter ? (approved ? '✓ Letter Approved' : 'Review & Edit Your Letter') : 'Generated Letter'}
+              </h3>
+              <div className="flex items-center gap-2">
+                {generatedLetter && letterId && (
+                  <Link href={`/letters/${letterId}`} className="text-white/30 hover:text-teal-400 text-xs transition-colors flex items-center gap-1">
+                    <ExternalLink className="w-3 h-3" /> Full editor
+                  </Link>
+                )}
+                {generatedLetter && !approved && (
+                  <button onClick={() => setShowApproval(true)}
+                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-teal-400 text-[#0a0f1a] font-bold text-xs hover:bg-teal-300 transition-all">
+                    <CheckCircle className="w-3.5 h-3.5" /> Approve & Finalize
+                  </button>
+                )}
+                {approved && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-400/15 border border-teal-400/30 text-teal-400 text-xs font-semibold">
+                    <CheckCircle className="w-3.5 h-3.5" /> Approved
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Status hint */}
+            {generatedLetter && !approved && (
+              <div className="flex items-center gap-2 bg-white/4 border border-white/10 rounded-xl px-3 py-2">
+                <AlertTriangle className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                <p className="text-white/40 text-xs">
+                  Fill in any <strong className="text-white/55">[BRACKETED]</strong> fields, make any edits, then click <strong className="text-white/55">Approve & Finalize</strong> to unlock copy, download, and print.
+                </p>
+              </div>
+            )}
+
+            {/* Approved action bar */}
+            {approved && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <button onClick={handleCopy}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/8 text-white/70 hover:text-white text-xs font-medium transition-all">
+                  {copied ? <CheckCheck className="w-3.5 h-3.5 text-teal-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+                <button onClick={handleDownload}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/8 text-white/70 hover:text-white text-xs font-medium transition-all">
+                  <Download className="w-3.5 h-3.5" /> PDF
+                </button>
+                <button onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/8 text-white/70 hover:text-white text-xs font-medium transition-all">
+                  <Printer className="w-3.5 h-3.5" /> Print
+                </button>
+                <button onClick={handleEmail} disabled={emailing}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-teal-400/15 text-teal-400 hover:bg-teal-400/25 text-xs font-medium transition-all disabled:opacity-50">
+                  <Mail className="w-3.5 h-3.5" /> Email Me
+                </button>
+              </div>
+            )}
+
+            {/* Letter content */}
+            {!generatedLetter && !loading && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl min-h-[520px] p-5 flex flex-col items-center justify-center text-center">
+                <FileText className="w-10 h-10 text-white/15 mb-3" />
+                <p className="text-white/30 text-sm font-medium">{currentLetterDef?.label}</p>
+                <p className="text-white/20 text-xs mt-1 max-w-48 leading-relaxed">{currentLetterDef?.description}</p>
+                <p className="text-white/12 text-xs mt-6 max-w-xs leading-relaxed">Your letter will appear here — edit it, then approve before use.</p>
+              </div>
+            )}
+
+            {loading && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl min-h-[520px] p-5 flex flex-col items-center justify-center">
+                <div className="typing-indicator flex gap-2 justify-center mb-3"><span /><span /><span /></div>
+                <p className="text-white/40 text-sm">Generating your letter…</p>
+              </div>
+            )}
+
+            {generatedLetter && (
+              <div className="relative">
+                <textarea
+                  value={generatedLetter}
+                  onChange={e => handleSaveEdit(e.target.value)}
+                  readOnly={approved}
+                  className={cn(
+                    'w-full min-h-[560px] rounded-xl p-8 text-sm font-mono leading-relaxed resize-none focus:outline-none shadow-inner',
+                    approved
+                      ? 'bg-white/5 border border-teal-400/20 text-white/70 cursor-default'
+                      : 'bg-white text-gray-900 focus:ring-2 focus:ring-teal-400/50'
+                  )}
+                  spellCheck
+                  placeholder="Letter content will appear here…"
+                />
+                {generatedLetter.includes('[') && !approved && (
+                  <div className="absolute bottom-3 right-3">
+                    <div className="bg-amber-500/90 text-[#0a0f1a] text-xs font-bold px-2.5 py-1.5 rounded-lg">
+                      Fill in [BRACKETED] fields
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SOL / settlement tips */}
+            {generatedLetter && letterType === 'statute_of_limitations' && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                <p className="text-red-300/80 text-xs"><strong>⚠️ Critical:</strong> Do NOT make any payment or promise to pay — in most states this restarts the SOL clock.</p>
+              </div>
+            )}
+            {generatedLetter && letterType === 'debt_settlement' && (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
+                <p className="text-blue-300/80 text-xs"><strong>💡 Tax note:</strong> Forgiven debt over $600 may generate a 1099-C. Consult a tax advisor if you are insolvent.</p>
+              </div>
+            )}
+
+            <p className="text-white/20 text-xs">⚖️ Educational template only — not legal advice. Send via USPS Certified Mail with Return Receipt.</p>
           </div>
         </div>
         </>
