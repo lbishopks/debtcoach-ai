@@ -13,12 +13,24 @@ import {
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 
+interface PlanLimits {
+  messagesLimit: number
+  lettersLimit: number
+}
+
 interface Props {
   profile: any
   subscription: any
   letterCount: number
   conversationCount: number
   userId: string
+  freeLimits: PlanLimits
+  proLimits: PlanLimits
+}
+
+function fmtLimit(n: number, unit: string): string {
+  if (n === -1) return 'Unlimited'
+  return `${n}/${unit}`
 }
 
 const TABS = [
@@ -27,7 +39,7 @@ const TABS = [
   { id: 'security', label: 'Security', icon: Shield },
 ]
 
-function AccountSettingsInner({ profile, subscription, letterCount, conversationCount, userId }: Props) {
+function AccountSettingsInner({ profile, subscription, letterCount, conversationCount, userId, freeLimits, proLimits }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile')
@@ -311,8 +323,16 @@ function AccountSettingsInner({ profile, subscription, letterCount, conversation
 
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'AI Messages', free: '3/day', pro: 'Unlimited' },
-                { label: 'Dispute Letters', free: '1/month', pro: 'Unlimited' },
+                {
+                  label: 'AI Messages',
+                  free: fmtLimit(freeLimits.messagesLimit, 'mo'),
+                  pro: fmtLimit(proLimits.messagesLimit, 'mo'),
+                },
+                {
+                  label: 'Dispute Letters',
+                  free: fmtLimit(freeLimits.lettersLimit, 'mo'),
+                  pro: fmtLimit(proLimits.lettersLimit, 'mo'),
+                },
                 { label: 'Script Library', free: 'Basic', pro: 'Full + AI personalized' },
                 { label: 'PDF Downloads', free: '✗', pro: '✓' },
               ].map(feat => (
@@ -447,7 +467,7 @@ function AccountSettingsInner({ profile, subscription, letterCount, conversation
 
 export function AccountSettings(props: Props) {
   return (
-    <Suspense fallback={<div className="p-8 text-white/50">Loading account...</div>}>
+    <Suspense fallback={<div className="p-8 text-white/50">Loading account…</div>}>
       <AccountSettingsInner {...props} />
     </Suspense>
   )
