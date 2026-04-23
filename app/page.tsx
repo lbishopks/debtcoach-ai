@@ -1,10 +1,5 @@
 import Link from 'next/link'
-import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone, Play } from 'lucide-react'
-
-// ─── Replace this with your YouTube video ID ───────────────────────────────
-// e.g. for https://www.youtube.com/watch?v=dQw4w9WgXcQ  →  VIDEO_ID = 'dQw4w9WgXcQ'
-const DEMO_VIDEO_ID = 'YOUR_YOUTUBE_VIDEO_ID'
-// ───────────────────────────────────────────────────────────────────────────
+import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone } from 'lucide-react'
 
 const FEATURES = [
   {
@@ -125,36 +120,41 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Video Demo */}
+      {/* How It Works */}
       <section className="pb-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">See It In Action</h2>
-            <p className="text-white/50">Watch how DebtCoach AI helps you take on collectors and win.</p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Up and Running in Minutes</h2>
+            <p className="text-white/50">No lawyers. No paperwork. Just answers and action.</p>
           </div>
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 bg-navy-100">
-            {DEMO_VIDEO_ID === 'YOUR_YOUTUBE_VIDEO_ID' ? (
-              /* Placeholder shown until you paste in a real video ID */
-              <div className="aspect-video flex flex-col items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200 gap-5">
-                <div className="w-20 h-20 rounded-full bg-teal-400/20 border-2 border-teal-400/40 flex items-center justify-center">
-                  <Play className="w-8 h-8 text-teal-400 ml-1" />
+          <div className="grid md:grid-cols-3 gap-6 relative">
+            {/* Connector line (desktop only) */}
+            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-teal-400/30 via-teal-400/60 to-teal-400/30" />
+            {[
+              {
+                step: '01',
+                title: 'Create Your Account',
+                desc: 'Sign up in under 2 minutes and subscribe for $9.95/month. No hidden fees, cancel any time.',
+              },
+              {
+                step: '02',
+                title: 'Describe Your Situation',
+                desc: 'Tell the AI coach about your debt — who\'s calling, how much, how old. It knows your rights so you don\'t have to.',
+              },
+              {
+                step: '03',
+                title: 'Take Action & Win',
+                desc: 'Send a dispute letter, follow a call script, or negotiate a settlement. The tools are ready — you execute.',
+              },
+            ].map(item => (
+              <div key={item.step} className="relative bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-teal-400/15 border border-teal-400/30 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-teal-400 font-extrabold text-sm">{item.step}</span>
                 </div>
-                <div className="text-center">
-                  <p className="text-white/60 font-semibold text-sm">Demo video coming soon</p>
-                  <p className="text-white/30 text-xs mt-1">Paste your YouTube video ID into page.tsx to activate</p>
-                </div>
+                <h3 className="text-white font-bold mb-2">{item.title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
               </div>
-            ) : (
-              <div className="aspect-video">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&color=white`}
-                  title="DebtCoach AI Demo"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            )}
+            ))}
           </div>
         </div>
       </section>
