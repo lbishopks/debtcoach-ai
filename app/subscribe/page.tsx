@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -16,7 +16,7 @@ const FEATURES = [
   'Priority support',
 ]
 
-export default function SubscribePage() {
+function SubscribeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isProcessing = searchParams.get('processing') === 'true'
@@ -215,5 +215,17 @@ export default function SubscribePage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function SubscribePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-teal-400 animate-spin" />
+      </div>
+    }>
+      <SubscribeContent />
+    </Suspense>
   )
 }
