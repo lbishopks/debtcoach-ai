@@ -1,5 +1,55 @@
 import Link from 'next/link'
-import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown } from 'lucide-react'
+import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone } from 'lucide-react'
+
+const FEATURES = [
+  {
+    icon: MessageSquare,
+    title: 'AI Negotiation Coach',
+    desc: 'Get unlimited guidance on FDCPA, FCRA, statute of limitations by state, and proven negotiation tactics — available 24/7.',
+    color: 'text-teal-400 bg-teal-400/10',
+  },
+  {
+    icon: FileText,
+    title: 'Dispute Letter Generator',
+    desc: 'Generate professionally-referenced dispute letter templates in seconds — FDCPA, FCRA, debt validation, cease & desist, and 11 more types.',
+    color: 'text-yellow-400 bg-yellow-400/10',
+  },
+  {
+    icon: TrendingDown,
+    title: 'Debt Tracker Dashboard',
+    desc: 'Track every debt, creditor, and negotiation status in one place. Visualize your total balance shrinking over time.',
+    color: 'text-blue-400 bg-blue-400/10',
+  },
+  {
+    icon: Phone,
+    title: 'Call Script Library',
+    desc: 'Ready-to-use scripts for settlement calls, pay-for-delete, cease & desist, and more — personalized to your situation.',
+    color: 'text-purple-400 bg-purple-400/10',
+  },
+  {
+    icon: Shield,
+    title: 'Know Your Legal Rights',
+    desc: 'Plain-English breakdowns of FDCPA, FCRA, and statute of limitations for all 50 states so collectors can\'t intimidate you.',
+    color: 'text-red-400 bg-red-400/10',
+  },
+  {
+    icon: BookOpen,
+    title: 'PDF & Email Delivery',
+    desc: 'Download any letter as a PDF, print it, or send it directly — all from your account. No copying and pasting.',
+    color: 'text-orange-400 bg-orange-400/10',
+  },
+]
+
+const INCLUDED = [
+  'Unlimited AI debt coaching conversations',
+  'Unlimited dispute letter generation',
+  'All 15 letter types (FDCPA, FCRA, SOL, and more)',
+  'PDF, print & email delivery',
+  'Debt tracking dashboard',
+  'Call scripts & negotiation guides',
+  'Know Your Rights — all 50 states',
+  'Priority support',
+]
 
 export default function LandingPage() {
   return (
@@ -18,7 +68,7 @@ export default function LandingPage() {
               Sign In
             </Link>
             <Link href="/auth/signup" className="bg-teal-400 text-navy-200 font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-300 transition-colors">
-              Get Started Free
+              Get Started
             </Link>
           </div>
         </div>
@@ -29,7 +79,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-teal-400/10 border border-teal-400/20 rounded-full px-4 py-2 text-teal-300 text-xs font-medium mb-8">
             <Star className="w-3.5 h-3.5" />
-            AI-Powered Debt Negotiation Assistant
+            AI-Powered Debt Negotiation — $9.95/month, Cancel Anytime
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
@@ -40,8 +90,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-white/60 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-            DebtCoach AI helps you understand your consumer rights, generates dispute letter templates,
-            and guides your journey to becoming debt-free — all in plain English.
+            DebtCoach AI gives you unlimited AI coaching, professionally-referenced dispute letters, and call scripts — everything you need to know your rights and negotiate smarter.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -49,7 +98,7 @@ export default function LandingPage() {
               href="/auth/signup"
               className="inline-flex items-center justify-center gap-2 bg-teal-400 text-navy-200 font-bold px-8 py-4 rounded-2xl text-base hover:bg-teal-300 transition-all hover:shadow-lg hover:shadow-teal-400/20 active:scale-95"
             >
-              Start Free — No Credit Card
+              Start Now — $9.95/month
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
@@ -60,7 +109,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="text-white/30 text-sm mt-6">Free plan includes 3 AI messages/day · No credit card required</p>
+          <p className="text-white/30 text-sm mt-6">Full access to every feature · Cancel anytime · Secured by Stripe</p>
 
           {/* Legal Disclaimer */}
           <div className="mt-8 max-w-2xl mx-auto bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-left">
@@ -76,64 +125,16 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything You Need to Win</h2>
-            <p className="text-white/50 max-w-xl mx-auto">Built by consumer rights experts. Powered by Claude AI.</p>
+            <p className="text-white/50 max-w-xl mx-auto">Built by consumer rights experts. Powered by Claude AI. Every feature included at $9.95/month.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: MessageSquare,
-                title: 'AI Negotiation Coach',
-                desc: 'Get consumer rights information on FDCPA, FCRA, statute of limitations by state, and general guidance on negotiation tactics.',
-                color: 'text-teal-400 bg-teal-400/10',
-                badge: 'Core Feature',
-              },
-              {
-                icon: FileText,
-                title: 'Dispute Letter Generator',
-                desc: 'Generate legally-referenced dispute letter templates in seconds. Educational use only — review with an attorney before sending.',
-                color: 'text-yellow-400 bg-yellow-400/10',
-                badge: null,
-              },
-              {
-                icon: TrendingDown,
-                title: 'Debt Tracker Dashboard',
-                desc: 'Track multiple debts, negotiation status, and visualize your total debt reduction over time.',
-                color: 'text-blue-400 bg-blue-400/10',
-                badge: null,
-              },
-              {
-                icon: BookOpen,
-                title: 'Phone Script Library',
-                desc: 'Ready-to-use scripts for settlement calls, cease & desist, pay-for-delete, and more.',
-                color: 'text-purple-400 bg-purple-400/10',
-                badge: null,
-              },
-              {
-                icon: Shield,
-                title: 'Know Your Rights',
-                desc: 'Plain-English breakdowns of FDCPA, FCRA, and statute of limitations for all 50 states.',
-                color: 'text-red-400 bg-red-400/10',
-                badge: null,
-              },
-              {
-                icon: Zap,
-                title: 'AI-Personalized Scripts',
-                desc: 'Pro users get scripts personalized with their creditor name, balance, and specific situation.',
-                color: 'text-orange-400 bg-orange-400/10',
-                badge: 'Pro',
-              },
-            ].map(feature => {
+            {FEATURES.map(feature => {
               const Icon = feature.icon
               return (
                 <div key={feature.title} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${feature.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    {feature.badge && (
-                      <span className="badge bg-teal-400/20 text-teal-300 text-xs">{feature.badge}</span>
-                    )}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${feature.color}`}>
+                    <Icon className="w-5 h-5" />
                   </div>
                   <h3 className="text-white font-semibold mb-2">{feature.title}</h3>
                   <p className="text-white/50 text-sm leading-relaxed">{feature.desc}</p>
@@ -144,62 +145,82 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing — single plan */}
       <section className="py-20 px-4 bg-white/3">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-white/50">Start free. Upgrade when you&apos;re ready.</p>
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">One Plan. Everything Included.</h2>
+            <p className="text-white/50">No tiers. No limits. No surprises.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Free */}
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-              <h3 className="text-white font-bold text-xl mb-1">Free</h3>
-              <p className="text-white/50 text-sm mb-6">Forever free, no card required</p>
-              <p className="text-5xl font-extrabold text-white mb-8">$0</p>
-              <ul className="space-y-3 mb-8">
-                {['3 AI messages per day', '1 dispute letter per month', 'Basic script library', 'Debt tracker (3 debts)', 'Know Your Rights page'].map(f => (
-                  <li key={f} className="flex items-center gap-3 text-white/70 text-sm">
-                    <CheckCircle className="w-4 h-4 text-teal-400 flex-shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/auth/signup" className="block text-center bg-white/10 text-white font-semibold py-3.5 rounded-2xl hover:bg-white/15 transition-colors border border-white/10">
-                Get Started Free
-              </Link>
+          <div className="bg-gradient-to-br from-teal-400/15 to-navy-100 border border-teal-400/30 rounded-3xl p-8 relative">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <span className="bg-teal-400 text-navy-200 text-xs font-bold px-4 py-1.5 rounded-full">FULL ACCESS</span>
             </div>
 
-            {/* Pro */}
-            <div className="bg-gradient-to-br from-teal-400/20 to-navy-100 border border-teal-400/30 rounded-3xl p-8 relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                <span className="bg-teal-400 text-navy-200 text-xs font-bold px-4 py-1.5 rounded-full">MOST POPULAR</span>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-white font-bold text-2xl mb-1">DebtCoach AI Pro</h3>
+                <p className="text-white/50 text-sm">Complete debt-fighting toolkit</p>
               </div>
-              <h3 className="text-white font-bold text-xl mb-1">Pro</h3>
-              <p className="text-white/50 text-sm mb-6">For serious debt reduction</p>
-              <div className="mb-8">
-                <p className="text-5xl font-extrabold text-white">$9.99<span className="text-white/40 text-lg font-normal">/mo</span></p>
-                <p className="text-teal-300 text-sm mt-1">or $79/year (save $41)</p>
+              <div className="text-right">
+                <p className="text-5xl font-extrabold text-white">$9.95</p>
+                <p className="text-white/40 text-sm">/month · Cancel anytime</p>
               </div>
-              <ul className="space-y-3 mb-8">
-                {['Unlimited AI coaching', 'Unlimited dispute letters', 'Full script library + AI personalization', 'PDF downloads', 'Unlimited debt tracking', 'Full AI debt analysis report', 'Priority support'].map(f => (
-                  <li key={f} className="flex items-center gap-3 text-white/80 text-sm">
-                    <CheckCircle className="w-4 h-4 text-teal-400 flex-shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/auth/signup" className="block text-center bg-teal-400 text-navy-200 font-bold py-3.5 rounded-2xl hover:bg-teal-300 transition-colors">
-                Start Free · Upgrade Anytime
-              </Link>
+            </div>
+
+            <ul className="grid sm:grid-cols-2 gap-3 mb-8">
+              {INCLUDED.map(f => (
+                <li key={f} className="flex items-center gap-2.5 text-white/80 text-sm">
+                  <CheckCircle className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <Link href="/auth/signup" className="block text-center bg-teal-400 text-navy-200 font-bold py-4 rounded-2xl hover:bg-teal-300 transition-colors text-base">
+              Get Started — $9.95/month
+            </Link>
+
+            <div className="flex items-center justify-center gap-6 mt-5 flex-wrap">
+              <div className="flex items-center gap-1.5 text-white/30 text-xs">
+                <Lock className="w-3 h-3" /> Secured by Stripe
+              </div>
+              <div className="flex items-center gap-1.5 text-white/30 text-xs">
+                <CheckCircle className="w-3 h-3" /> Cancel anytime
+              </div>
+              <div className="flex items-center gap-1.5 text-white/30 text-xs">
+                <Shield className="w-3 h-3" /> No hidden fees
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Why it's worth it */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">Less Than a Cup of Coffee</h2>
+            <p className="text-white/50 max-w-xl mx-auto">At $9.95/month, one successful dispute or settlement can pay for years of access.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { stat: '$0', label: 'Minimum savings from one successful debt validation dispute' },
+              { stat: '15+', label: 'Dispute letter templates included — FDCPA, FCRA, SOL, and more' },
+              { stat: '50', label: 'States covered with statute of limitations breakdowns' },
+            ].map(item => (
+              <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                <p className="text-4xl font-extrabold text-teal-400 mb-3">{item.stat}</p>
+                <p className="text-white/50 text-sm leading-relaxed">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="py-24 px-4">
+      <section className="py-24 px-4 bg-white/3">
         <div className="max-w-3xl mx-auto text-center">
           <div className="w-16 h-16 bg-teal-400 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <Zap className="w-8 h-8 text-navy-200" />
@@ -209,16 +230,16 @@ export default function LandingPage() {
             <span className="block text-teal-400">of Your Financial Future</span>
           </h2>
           <p className="text-white/50 text-lg mb-10">
-            Stop letting debt collectors intimidate you. Know your rights, negotiate smarter, and build your path to financial freedom.
+            Stop letting debt collectors intimidate you. Know your rights, dispute errors, negotiate smarter, and build your path to financial freedom — all for $9.95/month.
           </p>
           <Link
             href="/auth/signup"
             className="inline-flex items-center gap-2 bg-teal-400 text-navy-200 font-bold px-10 py-5 rounded-2xl text-lg hover:bg-teal-300 transition-all hover:shadow-2xl hover:shadow-teal-400/20 active:scale-95"
           >
-            Create Free Account
+            Get Started Today
             <ArrowRight className="w-5 h-5" />
           </Link>
-          <p className="text-white/30 text-sm mt-4">No credit card · Takes 2 minutes · Cancel anytime</p>
+          <p className="text-white/30 text-sm mt-4">$9.95/month · Cancel anytime · No hidden fees</p>
         </div>
       </section>
 
