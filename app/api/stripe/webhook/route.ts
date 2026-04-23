@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
+import { sendWelcomeEmail, sendCancellationEmail, sendPaymentFailedEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -39,6 +40,18 @@ export async function POST(req: NextRequest) {
           }, { onConflict: 'stripe_subscription_id' })
 
           await adminClient.from('users').update({ plan: 'pro' }).eq('id', userId)
+
+          // Send welcome email
+          const { data: profile } = await adminClient
+            .from('users')
+            .select('email, full_name')
+            .eq('id', userId)
+            .single()
+          if (profile?.email) {
+            sendWelcomeEmail(profile.email, profile.full_name).catch(e =>
+              console.error('Welcome email failed:', e)
+            )
+          }
         }
         break
       }
@@ -93,6 +106,21 @@ export async function POST(req: NextRequest) {
 
         if (sub?.user_id) {
           await adminClient.from('users').update({ plan: 'free' }).eq('id', sub.user_id)
+
+          // Send cancellation email
+          const { data: profile } = await adminClient
+            .from('users')
+            .select('email, full_name')
+            .eq('id', sub.user_id)
+            .single()
+          if (profile?.email) {
+            const periodEnd = subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000).toISOString()
+              : undefined
+            sendCancellationEmail(profile.email, profile.full_name, periodEnd).catch(e =>
+              console.error('Cancellation email failed:', e)
+            )
+          }
         }
         break
       }
@@ -104,6 +132,26 @@ export async function POST(req: NextRequest) {
         await adminClient.from('subscriptions').update({
           status: 'past_due',
         }).eq('stripe_subscription_id', subscriptionId)
+
+        // Send payment failed email
+        const { data: sub } = await adminClient
+          .from('subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscriptionId)
+          .maybeSingle()
+
+        if (sub?.user_id) {
+          const { data: profile } = await adminClient
+            .from('users')
+            .select('email, full_name')
+            .eq('id', sub.user_id)
+            .single()
+          if (profile?.email) {
+            sendPaymentFailedEmail(profile.email, profile.full_name).catch(e =>
+              console.error('Payment failed email failed:', e)
+            )
+          }
+        }
         break
       }
     }
