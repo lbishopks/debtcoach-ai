@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone } from 'lucide-react'
+import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone, Play } from 'lucide-react'
+
+// ─── Replace this with your YouTube video ID ───────────────────────────────
+// e.g. for https://www.youtube.com/watch?v=dQw4w9WgXcQ  →  VIDEO_ID = 'dQw4w9WgXcQ'
+const DEMO_VIDEO_ID = 'YOUR_YOUTUBE_VIDEO_ID'
+// ───────────────────────────────────────────────────────────────────────────
 
 const FEATURES = [
   {
@@ -120,6 +125,40 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Video Demo */}
+      <section className="pb-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">See It In Action</h2>
+            <p className="text-white/50">Watch how DebtCoach AI helps you take on collectors and win.</p>
+          </div>
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 bg-navy-100">
+            {DEMO_VIDEO_ID === 'YOUR_YOUTUBE_VIDEO_ID' ? (
+              /* Placeholder shown until you paste in a real video ID */
+              <div className="aspect-video flex flex-col items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200 gap-5">
+                <div className="w-20 h-20 rounded-full bg-teal-400/20 border-2 border-teal-400/40 flex items-center justify-center">
+                  <Play className="w-8 h-8 text-teal-400 ml-1" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white/60 font-semibold text-sm">Demo video coming soon</p>
+                  <p className="text-white/30 text-xs mt-1">Paste your YouTube video ID into page.tsx to activate</p>
+                </div>
+              </div>
+            ) : (
+              <div className="aspect-video">
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&color=white`}
+                  title="DebtCoach AI Demo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
@@ -197,18 +236,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Why it's worth it */}
+      {/* Stats — the numbers that matter */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Less Than a Cup of Coffee</h2>
-            <p className="text-white/50 max-w-xl mx-auto">At $9.95/month, one successful dispute or settlement can pay for years of access.</p>
+            <h2 className="text-3xl font-bold text-white mb-4">The Numbers Don&apos;t Lie</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Debt collectors count on you not knowing your rights. We change that.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { stat: '$0', label: 'Minimum savings from one successful debt validation dispute' },
-              { stat: '15+', label: 'Dispute letter templates included — FDCPA, FCRA, SOL, and more' },
-              { stat: '50', label: 'States covered with statute of limitations breakdowns' },
+              { stat: '$1,000', label: 'Maximum FDCPA fine a collector owes YOU per violation — DebtCoach AI helps you spot them' },
+              { stat: '15+', label: 'Dispute letter types included — debt validation, FCRA errors, cease & desist, pay-for-delete, and more' },
+              { stat: '50', label: 'States covered with plain-English statute of limitations breakdowns so you know when debt is time-barred' },
             ].map(item => (
               <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
                 <p className="text-4xl font-extrabold text-teal-400 mb-3">{item.stat}</p>
