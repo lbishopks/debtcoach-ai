@@ -24,23 +24,21 @@ export function formatDate(dateString: string): string {
 
 export function getDebtStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    new: 'bg-slate-500/20 text-slate-300',
-    in_progress: 'bg-blue-500/20 text-blue-300',
+    active: 'bg-blue-500/20 text-blue-300',
+    in_dispute: 'bg-yellow-500/20 text-yellow-300',
     settled: 'bg-teal-500/20 text-teal-300',
     paid: 'bg-green-500/20 text-green-300',
-    disputed: 'bg-yellow-500/20 text-yellow-300',
     closed: 'bg-gray-500/20 text-gray-400',
   }
-  return colors[status] || colors.new
+  return colors[status] || 'bg-slate-500/20 text-slate-300'
 }
 
 export function getDebtStatusLabel(status: string): string {
   const labels: Record<string, string> = {
-    new: 'New',
-    in_progress: 'In Progress',
+    active: 'Active',
+    in_dispute: 'In Dispute',
     settled: 'Settled',
     paid: 'Paid',
-    disputed: 'Disputed',
     closed: 'Closed',
   }
   return labels[status] || status
@@ -50,9 +48,11 @@ export function getDebtTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     credit_card: 'Credit Card',
     medical: 'Medical',
-    student: 'Student Loan',
+    student_loan: 'Student Loan',
     personal_loan: 'Personal Loan',
     auto: 'Auto Loan',
+    collections: 'Collections',
+    mortgage: 'Mortgage',
     other: 'Other',
   }
   return labels[type] || type

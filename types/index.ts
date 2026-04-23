@@ -1,6 +1,6 @@
 export type Plan = 'free' | 'pro'
-export type DebtStatus = 'new' | 'in_progress' | 'settled' | 'paid' | 'disputed' | 'closed'
-export type DebtType = 'credit_card' | 'medical' | 'student' | 'personal_loan' | 'auto' | 'other'
+export type DebtStatus = 'active' | 'in_dispute' | 'settled' | 'paid' | 'closed'
+export type DebtType = 'credit_card' | 'medical' | 'student_loan' | 'personal_loan' | 'auto' | 'collections' | 'mortgage' | 'other'
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due'
 
 export type LetterType =

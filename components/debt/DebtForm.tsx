@@ -10,16 +10,17 @@ import type { Debt } from '@/types'
 const DEBT_TYPE_OPTIONS = [
   { value: 'credit_card', label: 'Credit Card' },
   { value: 'medical', label: 'Medical' },
-  { value: 'student', label: 'Student Loan' },
+  { value: 'student_loan', label: 'Student Loan' },
   { value: 'personal_loan', label: 'Personal Loan' },
   { value: 'auto', label: 'Auto Loan' },
+  { value: 'collections', label: 'Collections' },
+  { value: 'mortgage', label: 'Mortgage' },
   { value: 'other', label: 'Other' },
 ]
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'disputed', label: 'Disputed' },
+  { value: 'in_dispute', label: 'In Dispute' },
   { value: 'settled', label: 'Settled' },
   { value: 'paid', label: 'Paid' },
   { value: 'closed', label: 'Closed' },
