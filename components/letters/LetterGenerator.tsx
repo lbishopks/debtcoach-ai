@@ -272,8 +272,17 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
         body: JSON.stringify({ letterType, creditorName, accountNumber, debtId: debtId || null, disputeReason, additionalDetails, amount, state, fdcpaViolations: fdcpaViolation, settlementOffer, contactDates }),
       })
       if (res.status === 429) { setShowUpgrade(true); return }
-      if (!res.ok) throw new Error('Failed to generate letter')
+      if (!res.ok) {
+        let errMsg = `Generation failed (${res.status})`
+        try {
+          const errData = await res.json()
+          if (errData.message) errMsg = errData.message
+          else if (typeof errData.error === 'string') errMsg = errData.error
+        } catch {}
+        throw new Error(errMsg)
+      }
       const data = await res.json()
+      if (!data.content) throw new Error('No letter content returned — please try again')
       setGeneratedLetter(data.content)
       setLetterId(data.letterId || null)
       toast.success('Letter generated — review and edit below')

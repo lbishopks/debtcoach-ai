@@ -31,6 +31,36 @@ async function getMaintenanceMode(): Promise<boolean> {
   }
 }
 
+// Per-user plan cache (60s TTL) — avoids a DB hit on every request
+const _planCache = new Map<string, { plan: string; ts: number }>()
+const PLAN_CACHE_TTL = 60_000 // 60 seconds
+
+async function getUserPlan(userId: string, bustCache = false): Promise<string> {
+  const now = Date.now()
+  if (!bustCache) {
+    const cached = _planCache.get(userId)
+    if (cached && now - cached.ts < PLAN_CACHE_TTL) return cached.plan
+  }
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?id=eq.${userId}&select=plan&limit=1`,
+      {
+        headers: {
+          'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+        cache: 'no-store',
+      }
+    )
+    const [row] = await res.json() as { plan: string }[]
+    const plan = row?.plan || 'free'
+    _planCache.set(userId, { plan, ts: now })
+    return plan
+  } catch {
+    return 'free' // fail open — individual API routes still enforce limits
+  }
+}
+
 function isAdmin(email: string | undefined): boolean {
   const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase())
   return !!email && adminEmails.includes(email.toLowerCase())
@@ -93,7 +123,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/scripts') ||
     pathname.startsWith('/account') ||
     pathname.startsWith('/onboarding') ||
-    pathname.startsWith('/admin')
+    pathname.startsWith('/admin') ||
+    pathname === '/subscribe'
 
   const isAuthRoute = pathname.startsWith('/auth')
 
@@ -108,6 +139,25 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  // Subscription gate — authenticated users on app routes must have an active plan
+  // /subscribe and /admin are exempt; API routes enforce their own limits
+  const isSubscribeRoute = pathname === '/subscribe'
+  const isApiRoute = pathname.startsWith('/api/')
+
+  if (user && isProtectedRoute && !isSubscribeRoute && !isAdminRoute && !isApiRoute && !isAdmin(user.email)) {
+    // Bust cache when coming back from Stripe payment (success redirect includes ?processing=true)
+    const bustCache = request.nextUrl.searchParams.has('processing')
+    const plan = await getUserPlan(user.id, bustCache)
+
+    if (plan !== 'pro') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/subscribe'
+      // Clear query params to avoid infinite redirect loops
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

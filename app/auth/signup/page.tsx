@@ -28,11 +28,11 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/onboarding`,
+          emailRedirectTo: `${window.location.origin}/subscribe`,
         },
       })
       if (error) throw error
-      router.push('/onboarding')
+      router.push('/subscribe')
     } catch (err: any) {
       toast.error(err.message || 'Signup failed')
     } finally {
@@ -85,7 +85,7 @@ export default function SignupPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-white mb-1">Create your account</h1>
-          <p className="text-white/50 text-sm mb-6">Free forever. No credit card required.</p>
+          <p className="text-white/50 text-sm mb-6">Step 1 of 2 — set up your account, then choose a plan.</p>
 
           <div className="card space-y-4">
             <form onSubmit={handleSignup} className="space-y-4">
@@ -118,7 +118,7 @@ export default function SignupPage() {
                 autoComplete="new-password"
               />
               <Button type="submit" loading={loading} className="w-full" size="lg">
-                Create Free Account
+                Create Account →
               </Button>
             </form>
 
