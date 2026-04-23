@@ -156,7 +156,7 @@ export default function SubscribePage() {
           <div className="bg-white/4 border border-white/12 rounded-2xl p-5 flex flex-col">
             <p className="text-white/60 text-sm font-medium mb-1">Monthly</p>
             <div className="flex items-baseline gap-1 mb-4">
-              <span className="text-3xl font-bold text-white">$29</span>
+              <span className="text-3xl font-bold text-white">$9.95</span>
               <span className="text-white/40 text-sm">/month</span>
             </div>
             <p className="text-white/30 text-xs mb-5">Billed monthly. Cancel anytime.</p>
@@ -179,10 +179,10 @@ export default function SubscribePage() {
             </div>
             <p className="text-teal-300 text-sm font-medium mb-1">Annual</p>
             <div className="flex items-baseline gap-1 mb-0.5">
-              <span className="text-3xl font-bold text-white">$199</span>
+              <span className="text-3xl font-bold text-white">$79</span>
               <span className="text-white/40 text-sm">/year</span>
             </div>
-            <p className="text-teal-400/70 text-xs mb-4">~$16.58/mo — save $149 vs. monthly</p>
+            <p className="text-teal-400/70 text-xs mb-4">~$6.58/mo — save $40 vs. monthly</p>
             <p className="text-white/30 text-xs mb-5">Billed once per year.</p>
             <button
               onClick={() => handleSubscribe('yearly')}
