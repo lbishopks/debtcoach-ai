@@ -130,7 +130,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6 relative">
             {/* Connector line (desktop only) */}
             <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-teal-400/30 via-teal-400/60 to-teal-400/30" />
-            [
+            {[
               {
                 step: '01',
                 title: 'Create Your Account',
