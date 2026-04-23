@@ -10,7 +10,7 @@ const FEATURES = [
   'Unlimited AI debt coaching conversations',
   'Unlimited dispute letter generation',
   'All 15 letter types (FDCPA, FCRA, SOL, and more)',
-  'PDF, print & email delivery',
+  'PDF & print-ready dispute letters',
   'Debt tracking dashboard',
   'Call scripts & negotiation guides',
   'Priority support',
@@ -133,8 +133,8 @@ function SubscribeContent() {
 
       <div className="w-full max-w-xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Activate Your Account</h1>
-          <p className="text-white/50">Full access to every tool. Cancel any time.</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Almost There — Activate Your Account</h1>
+          <p className="text-white/50">Step 3 of 3 · Full access to every tool. Cancel any time.</p>
         </div>
 
         {/* Feature list */}

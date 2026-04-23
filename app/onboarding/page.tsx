@@ -129,8 +129,8 @@ export default function OnboardingPage() {
         })
       }
 
-      toast.success('Welcome to DebtCoach AI!')
-      router.push('/dashboard')
+      toast.success('Profile saved! Now let\'s activate your account.')
+      router.push('/subscribe')
     } catch (err: any) {
       toast.error(err.message || 'Setup failed')
     } finally {

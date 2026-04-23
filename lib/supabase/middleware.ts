@@ -117,12 +117,15 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // /onboarding is auth-protected but NOT subscription-gated — users complete it before paying
+  const isOnboardingRoute = pathname.startsWith('/onboarding')
+
   const isProtectedRoute = pathname.startsWith('/dashboard') ||
     pathname.startsWith('/chat') ||
     pathname.startsWith('/letters') ||
     pathname.startsWith('/scripts') ||
     pathname.startsWith('/account') ||
-    pathname.startsWith('/onboarding') ||
+    isOnboardingRoute ||
     pathname.startsWith('/admin') ||
     pathname === '/subscribe'
 
@@ -146,7 +149,7 @@ export async function updateSession(request: NextRequest) {
   const isSubscribeRoute = pathname === '/subscribe'
   const isApiRoute = pathname.startsWith('/api/')
 
-  if (user && isProtectedRoute && !isSubscribeRoute && !isAdminRoute && !isApiRoute && !isAdmin(user.email)) {
+  if (user && isProtectedRoute && !isSubscribeRoute && !isOnboardingRoute && !isAdminRoute && !isApiRoute && !isAdmin(user.email)) {
     // Bust cache when coming back from Stripe payment (success redirect includes ?processing=true)
     const bustCache = request.nextUrl.searchParams.has('processing')
     const plan = await getUserPlan(user.id, bustCache)

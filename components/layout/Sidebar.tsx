@@ -37,7 +37,8 @@ export function Sidebar({ plan = 'free' }: SidebarProps) {
 
   const handleLogout = async () => {
     const supabase = createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'global' })
+    router.refresh()
     router.push('/')
   }
 

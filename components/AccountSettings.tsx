@@ -143,8 +143,9 @@ function AccountSettingsInner({ profile, subscription, letterCount, conversation
 
     try {
       const supabase = createClient()
-      await supabase.auth.signOut()
-      toast.success('Account deletion requested. Contact support@debtcoachai.com to complete.')
+      await supabase.auth.signOut({ scope: 'global' })
+      toast.success('Account deletion requested. Contact support@thedebtcoachai.com to complete.')
+      router.refresh()
       router.push('/')
     } catch (err: any) {
       toast.error(err.message)

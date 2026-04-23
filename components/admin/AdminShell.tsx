@@ -1,11 +1,12 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, CreditCard, FileText, BarChart2,
-  Settings, Zap, Menu, X, ChevronRight, LogOut
+  Settings, Zap, Menu, X, ChevronRight, LogOut, ArrowLeft
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
@@ -18,7 +19,15 @@ const navItems = [
 
 export function AdminShell({ children, userEmail }: { children: React.ReactNode; userEmail: string }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut({ scope: 'global' })
+    router.refresh()
+    router.push('/')
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] flex">
@@ -84,9 +93,16 @@ export function AdminShell({ children, userEmail }: { children: React.ReactNode;
             href="/dashboard"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-white hover:bg-white/5 transition-all"
           >
-            <LogOut className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
             <span>Back to App</span>
           </Link>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
+          </button>
           <div className="px-3 py-2 text-[11px] text-white/25 truncate">
             {userEmail}
           </div>

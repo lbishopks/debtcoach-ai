@@ -34,8 +34,8 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    title: 'PDF & Email Delivery',
-    desc: 'Download any letter as a PDF, print it, or send it directly — all from your account. No copying and pasting.',
+    title: 'PDF & Print Ready',
+    desc: 'Download any letter as a PDF and print it — formatted for certified mail and ready to send from your own email or mailbox.',
     color: 'text-orange-400 bg-orange-400/10',
   },
 ]
@@ -44,7 +44,7 @@ const INCLUDED = [
   'Unlimited AI debt coaching conversations',
   'Unlimited dispute letter generation',
   'All 15 letter types (FDCPA, FCRA, SOL, and more)',
-  'PDF, print & email delivery',
+  'PDF & print-ready dispute letters',
   'Debt tracking dashboard',
   'Call scripts & negotiation guides',
   'Know Your Rights — all 50 states',
@@ -130,16 +130,16 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6 relative">
             {/* Connector line (desktop only) */}
             <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-teal-400/30 via-teal-400/60 to-teal-400/30" />
-            {[
+            [
               {
                 step: '01',
                 title: 'Create Your Account',
-                desc: 'Sign up in under 2 minutes and subscribe for $9.95/month. No hidden fees, cancel any time.',
+                desc: 'Sign up in under 2 minutes. Enter your name, address, and first debt — we use it to pre-fill every letter.',
               },
               {
                 step: '02',
-                title: 'Describe Your Situation',
-                desc: 'Tell the AI coach about your debt — who\'s calling, how much, how old. It knows your rights so you don\'t have to.',
+                title: 'Subscribe for $9.95/month',
+                desc: 'Unlock full access after your profile is set up. No hidden fees, cancel any time.',
               },
               {
                 step: '03',
