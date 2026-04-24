@@ -9,13 +9,13 @@
  *   if (!result.allowed) return 429
  */
 
-interface Window {
+interface RateLimitWindow {
   count: number
   resetAt: number
 }
 
 // Keyed by `${ip}:${bucket}` → sliding window state
-const store = new Map<string, Window>()
+const store = new Map<string, RateLimitWindow>()
 
 // Periodically purge expired entries to prevent memory growth
 setInterval(() => {
