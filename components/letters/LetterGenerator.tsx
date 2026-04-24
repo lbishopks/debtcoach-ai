@@ -172,6 +172,49 @@ interface Props {
   savedLetters: Letter[]
 }
 
+// ── Pre-Generation Disclaimer Modal ──────────────────────────────────────────
+function DisclaimerModal({ onAccept, onClose }: { onAccept: () => void; onClose: () => void }) {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#0f1624] border border-white/12 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-6 border-b border-white/8">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 rounded-xl bg-amber-400/15 flex items-center justify-center">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+            </div>
+            <h2 className="text-white font-bold text-lg">Before You Generate</h2>
+          </div>
+          <p className="text-white/40 text-sm mt-1">Please read and acknowledge the following.</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="bg-white/4 border border-white/10 rounded-xl p-4 space-y-2 text-xs text-white/50 leading-relaxed">
+            <p><strong className="text-white/70">Not Legal Advice.</strong> These letter templates are for educational and informational purposes only. DebtCoach AI is not a law firm and does not provide legal or financial advice.</p>
+            <p><strong className="text-white/70">No Attorney-Client Relationship.</strong> Using this tool does not create an attorney-client relationship. Results are not guaranteed.</p>
+            <p><strong className="text-white/70">Use at Your Own Risk.</strong> Review all letters carefully before sending. For legal matters, consult a licensed attorney in your state.</p>
+          </div>
+          <button onClick={() => setChecked(c => !c)}
+            className={`w-full text-left flex gap-3 p-4 rounded-xl border transition-all ${checked ? 'border-teal-400/40 bg-teal-400/8' : 'border-white/10 bg-white/3 hover:border-white/20'}`}>
+            <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 border transition-all ${checked ? 'bg-teal-400 border-teal-400' : 'border-white/25 bg-transparent'}`}>
+              {checked && <CheckCheck className="w-3 h-3 text-[#0a0f1a]" />}
+            </div>
+            <p className={`text-sm font-medium transition-colors leading-snug ${checked ? 'text-teal-300' : 'text-white/80'}`}>
+              I understand this is not legal or financial advice, these are educational templates only, and I use them at my own risk.
+            </p>
+          </button>
+        </div>
+        <div className="px-6 pb-6 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-white/6 text-white/60 hover:text-white text-sm font-medium transition-all hover:bg-white/10">Cancel</button>
+          <button onClick={onAccept} disabled={!checked}
+            className="flex-1 py-3 rounded-xl bg-teal-400 text-[#0a0f1a] font-bold text-sm transition-all hover:bg-teal-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4" /> Generate Letter
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Approval Modal ────────────────────────────────────────────────────────────
 function ApprovalModal({ onApprove, onClose }: { onApprove: () => void; onClose: () => void }) {
   const [checks, setChecks] = useState({ own: false, reviewed: false, agreed: false })
@@ -241,6 +284,8 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
   const [emailing, setEmailing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [letters, setLetters] = useState<Letter[]>(initialLetters)
 
   const currentLetterDef = ALL_LETTERS.find(l => l.value === letterType)
@@ -257,6 +302,18 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
   const needsFdcpa = letterType === 'fdcpa_violation'
   const needsSettlement = ['debt_settlement', 'pay_for_delete'].includes(letterType)
   const needsDates = ['fdcpa_violation', 'cease_desist', 'statute_of_limitations'].includes(letterType)
+
+  const handleGenerateClick = () => {
+    if (!creditorName.trim()) { toast.error('Please enter the creditor or collector name'); return }
+    if (!disclaimerAccepted) { setShowDisclaimer(true); return }
+    handleGenerate()
+  }
+
+  const handleDisclaimerAccept = () => {
+    setDisclaimerAccepted(true)
+    setShowDisclaimer(false)
+    handleGenerate()
+  }
 
   const handleGenerate = async () => {
     if (!creditorName.trim()) { toast.error('Please enter the creditor or collector name'); return }
@@ -348,6 +405,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      {showDisclaimer && <DisclaimerModal onAccept={handleDisclaimerAccept} onClose={() => setShowDisclaimer(false)} />}
       {showApproval && <ApprovalModal onApprove={handleApprove} onClose={() => setShowApproval(false)} />}
       <div className="mb-4">
         <h1 className="section-header">Dispute Letter Center</h1>
@@ -450,7 +508,7 @@ export function LetterGenerator({ plan, state, debts, savedLetters: initialLette
               )}
               {needsDates && <Input label="Date(s) of Violation / Contact" placeholder="e.g. Jan 5 2025 at 6:30am" value={contactDates} onChange={(e) => setContactDates(e.target.value)} />}
               <Textarea label="Additional Details" placeholder="Prior correspondence, key dates, specific circumstances..." value={additionalDetails} onChange={(e) => setAdditionalDetails(e.target.value)} rows={3} />
-              <Button onClick={handleGenerate} loading={loading} className="w-full" icon={<Sparkles className="w-4 h-4" />}>
+              <Button onClick={handleGenerateClick} loading={loading} className="w-full" icon={<Sparkles className="w-4 h-4" />}>
                 Generate {currentLetterDef?.label}
               </Button>
               {plan === 'free' && <p className="text-white/30 text-xs text-center">Free: 1/month · <Link href="/account?tab=billing" className="text-teal-400">Go Pro</Link></p>}
