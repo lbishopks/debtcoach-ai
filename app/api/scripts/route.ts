@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { anthropic } from '@/lib/anthropic'
+import { anthropic, SCRIPTS_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { sanitize, safeNumber, safeError } from '@/lib/validation'
 
 export async function POST(req: NextRequest) {
@@ -30,32 +30,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
-    const prompt = `Personalize this debt negotiation script for a specific user's situation. This is for educational purposes only — not legal advice.
+    const prompt = `Personalize this call script template as an educational reference for a consumer preparing for their own call. This is for educational purposes only — not legal advice.
 
 Script Title: ${scriptTitle}
 
 Original Script Template:
 ${scriptTemplate}
 
-User's Specific Situation:
+Consumer's Situation (for personalization):
 - Name: ${userName || '[USER NAME]'}
 - State: ${userState || 'Unknown'}
 ${hasDebt ? `- Creditor: ${creditorName}
 - Balance: $${balance.toLocaleString()}
 - Debt Type: ${debtType}` : '- No specific debt selected'}
 
-Instructions:
+Personalization Instructions:
 1. Keep the same script structure and key phrases
-2. Fill in or suggest specific numbers (e.g., calculate a 35% settlement offer from the balance)
-3. Replace generic placeholders with the user's actual info where available
-4. Add any state-specific tips if relevant
-5. Keep [BRACKETS] only for things the user truly needs to fill in themselves
-6. Make the language sound natural and confident
-7. Include a reminder that this script is for educational use and users should consult an attorney before taking legal action`
+2. Fill in specific details where available (e.g., name, creditor, calculate an example 35% settlement figure from the balance as an illustrative starting point — not a recommendation)
+3. Replace generic placeholders with the consumer's actual info where provided
+4. Add any general state-specific educational notes about what the law in that state generally provides
+5. Keep [BRACKETS] for anything the consumer must decide or fill in themselves
+6. Frame all language as general possibilities ("some consumers say..." / "one approach is...") — never as directives
+7. Do NOT include language threatening litigation or claiming specific legal violations occurred`
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1200,
+      max_tokens: 1400,
+      system: SCRIPTS_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],
     })
 
