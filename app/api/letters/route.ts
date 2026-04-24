@@ -62,6 +62,15 @@ export async function POST(req: NextRequest) {
     const { data: profile } = await adminClient.from('users').select('plan').eq('id', user.id).single()
 
     const plan = profile?.plan || 'free'
+
+    // Hard subscription gate
+    if (plan !== 'pro') {
+      return NextResponse.json(
+        { error: 'PRO_REQUIRED', message: 'A Pro subscription is required to generate letters.' },
+        { status: 403 }
+      )
+    }
+
     const { lettersLimit } = await getPlanLimits(plan)
 
     if (lettersLimit !== -1) {

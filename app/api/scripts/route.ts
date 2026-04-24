@@ -1,17 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, SCRIPTS_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { sanitize, safeNumber, safeError } from '@/lib/validation'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   try {
+    // IP-level rate limit
+    const ip = getClientIp(req)
+    const rl = rateLimit(ip, 'scripts', { limit: 15, windowMs: 60_000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+      )
+    }
+
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: profile } = await supabase.from('users').select('plan').eq('id', user.id).single()
+    const adminClient = createAdminClient()
+    const { data: profile } = await adminClient.from('users').select('plan').eq('id', user.id).single()
     if (profile?.plan !== 'pro') {
-      return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'PRO_REQUIRED', message: 'A Pro subscription is required to personalize call scripts.' },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()

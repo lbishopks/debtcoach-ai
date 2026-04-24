@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, BUREAU_DISPUTE_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { disputeSchema, sanitize, safeNumber, safeError } from '@/lib/validation'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 const BUREAU_ADDRESSES: Record<string, { name: string; address: string; online: string }> = {
   equifax: {
@@ -36,6 +37,16 @@ const DISPUTE_TYPE_DESCRIPTIONS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
+    // IP-level rate limit
+    const ip = getClientIp(req)
+    const rl = rateLimit(ip, 'dispute', { limit: 10, windowMs: 60_000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+      )
+    }
+
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -60,21 +71,12 @@ export async function POST(req: NextRequest) {
     const adminClient = createAdminClient()
     const { data: profile } = await adminClient.from('users').select('plan').eq('id', user.id).single()
 
-    if (profile?.plan === 'free') {
-      const thisMonth = new Date()
-      thisMonth.setDate(1)
-      const { count } = await adminClient
-        .from('letters')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', thisMonth.toISOString())
-
-      if ((count || 0) >= 1) {
-        return NextResponse.json({
-          error: 'LIMIT_REACHED',
-          message: 'Free plan allows 1 letter per month. Upgrade to Pro for unlimited dispute letters.',
-        }, { status: 429 })
-      }
+    // Hard subscription gate — no free access to any AI features
+    if (profile?.plan !== 'pro') {
+      return NextResponse.json(
+        { error: 'PRO_REQUIRED', message: 'A Pro subscription is required to generate dispute letters.' },
+        { status: 403 }
+      )
     }
 
     // Fetch user profile for letterhead

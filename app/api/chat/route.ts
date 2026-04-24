@@ -45,6 +45,16 @@ export async function POST(req: NextRequest) {
       .single()
 
     const plan = profile?.plan || 'free'
+
+    // Hard subscription gate — pro plan required for all AI features.
+    // This blocks direct API calls that bypass the UI subscription redirect.
+    if (plan !== 'pro') {
+      return NextResponse.json(
+        { error: 'PRO_REQUIRED', message: 'A Pro subscription is required to use DebtCoach AI. Visit /subscribe to get started.' },
+        { status: 403 }
+      )
+    }
+
     const { messagesLimit } = await getPlanLimits(plan)
 
     // Track monthly usage for all limited plans
