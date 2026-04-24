@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Zap, MessageSquare, FileText, BookOpen, Shield, CheckCircle, ArrowRight, Star, TrendingDown, Lock, Phone } from 'lucide-react'
+import ProductTour from '@/components/landing/ProductTour'
 
 const FEATURES = [
   {
@@ -158,6 +159,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Product Tour */}
+      <ProductTour />
 
       {/* Features */}
       <section className="py-20 px-4">

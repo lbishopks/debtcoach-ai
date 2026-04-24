@@ -4,9 +4,24 @@ import { anthropic, DEBT_COACH_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { createClient } from '@/lib/supabase/server'
 import { chatSchema, safeError } from '@/lib/validation'
 import { getPlanLimits } from '@/lib/platform-settings'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   try {
+    // IP-level rate limit: 30 chat requests per minute per IP address.
+    // This caps runaway clients before they touch auth or the DB.
+    const ip = getClientIp(req)
+    const rl = rateLimit(ip, 'chat', { limit: 30, windowMs: 60_000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rl.retryAfterSeconds) },
+        }
+      )
+    }
+
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -1,0 +1,25 @@
+User-agent: *
+
+# Allow public marketing pages
+Allow: /$
+Allow: /privacy
+Allow: /terms
+
+# Block all app routes — authenticated content
+Disallow: /dashboard
+Disallow: /chat
+Disallow: /letters
+Disallow: /scripts
+Disallow: /account
+Disallow: /admin
+Disallow: /onboarding
+Disallow: /subscribe
+Disallow: /auth
+
+# Block all API endpoints
+Disallow: /api/
+
+# Block Next.js internals
+Disallow: /_next/
+
+Sitemap: https://www.thedebtcoachai.com/sitemap.xml

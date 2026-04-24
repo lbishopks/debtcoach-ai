@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, LETTER_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { letterSchema, sanitize, safeNumber, safeError } from '@/lib/validation'
 import { getPlanLimits } from '@/lib/platform-settings'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 const LETTER_TYPE_DESCRIPTIONS: Record<string, string> = {
   dispute: 'formal debt dispute letter challenging the validity and accuracy of the debt under FDCPA § 1692g and FCRA § 1681i, demanding validation and cessation of collection activity',
@@ -24,6 +25,16 @@ const LETTER_TYPE_DESCRIPTIONS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
+    // IP-level rate limit: 10 letter generations per minute per IP.
+    const ip = getClientIp(req)
+    const rl = rateLimit(ip, 'letters', { limit: 10, windowMs: 60_000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSeconds) } }
+      )
+    }
+
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
