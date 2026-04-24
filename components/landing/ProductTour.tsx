@@ -329,7 +329,7 @@ export default function ProductTour() {
             Interactive Product Tour
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">See DebtCoach AI in Action</h2>
-          <p className="text-white/50 max-w-xl mx-auto">Click through each feature or let it play automatically — every tool is included in your $9.95/month subscription.</p>
+          <p className="text-white/50 max-w-xl mx-auto">Click through each feature or let it play automatically — every tool is included in your $19.95/month subscription.</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">

@@ -80,7 +80,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-teal-400/10 border border-teal-400/20 rounded-full px-4 py-2 text-teal-300 text-xs font-medium mb-8">
             <Star className="w-3.5 h-3.5" />
-            AI-Powered Debt Negotiation — $9.95/month, Cancel Anytime
+            AI-Powered Debt Negotiation — $19.95/month, Cancel Anytime
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
@@ -99,7 +99,7 @@ export default function LandingPage() {
               href="/auth/signup"
               className="inline-flex items-center justify-center gap-2 bg-teal-400 text-navy-200 font-bold px-8 py-4 rounded-2xl text-base hover:bg-teal-300 transition-all hover:shadow-lg hover:shadow-teal-400/20 active:scale-95"
             >
-              Start Now — $9.95/month
+              Start Now — $19.95/month
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
@@ -139,7 +139,7 @@ export default function LandingPage() {
               },
               {
                 step: '02',
-                title: 'Subscribe for $9.95/month',
+                title: 'Subscribe for $19.95/month',
                 desc: 'Unlock full access after your profile is set up. No hidden fees, cancel any time.',
               },
               {
@@ -168,7 +168,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything You Need to Win</h2>
-            <p className="text-white/50 max-w-xl mx-auto">Built by consumer rights experts. Powered by Claude AI. Every feature included at $9.95/month.</p>
+            <p className="text-white/50 max-w-xl mx-auto">Built by consumer rights experts. Powered by Claude AI. Every feature included at $19.95/month.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -207,7 +207,7 @@ export default function LandingPage() {
                 <p className="text-white/50 text-sm">Complete debt-fighting toolkit</p>
               </div>
               <div className="text-right">
-                <p className="text-5xl font-extrabold text-white">$9.95</p>
+                <p className="text-5xl font-extrabold text-white">$19.95</p>
                 <p className="text-white/40 text-sm">/month · Cancel anytime</p>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function LandingPage() {
             </ul>
 
             <Link href="/auth/signup" className="block text-center bg-teal-400 text-navy-200 font-bold py-4 rounded-2xl hover:bg-teal-300 transition-colors text-base">
-              Get Started — $9.95/month
+              Get Started — $19.95/month
             </Link>
 
             <div className="flex items-center justify-center gap-6 mt-5 flex-wrap">
@@ -273,7 +273,7 @@ export default function LandingPage() {
             <span className="block text-teal-400">of Your Financial Future</span>
           </h2>
           <p className="text-white/50 text-lg mb-10">
-            Stop letting debt collectors intimidate you. Know your rights, dispute errors, negotiate smarter, and build your path to financial freedom — all for $9.95/month.
+            Stop letting debt collectors intimidate you. Know your rights, dispute errors, negotiate smarter, and build your path to financial freedom — all for $19.95/month.
           </p>
           <Link
             href="/auth/signup"
@@ -282,7 +282,7 @@ export default function LandingPage() {
             Get Started Today
             <ArrowRight className="w-5 h-5" />
           </Link>
-          <p className="text-white/30 text-sm mt-4">$9.95/month · Cancel anytime · No hidden fees</p>
+          <p className="text-white/30 text-sm mt-4">$19.95/month · Cancel anytime · No hidden fees</p>
         </div>
       </section>
 

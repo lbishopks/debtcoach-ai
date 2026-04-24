@@ -156,7 +156,7 @@ function SubscribeContent() {
             <div>
               <p className="text-teal-300 text-sm font-semibold mb-1">DebtCoach AI Pro</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">$9.95</span>
+                <span className="text-4xl font-bold text-white">$19.95</span>
                 <span className="text-white/40 text-sm">/month</span>
               </div>
               <p className="text-white/30 text-xs mt-1">Billed monthly. Cancel anytime.</p>
@@ -171,7 +171,7 @@ function SubscribeContent() {
             className="w-full py-3.5 rounded-xl bg-teal-400 text-[#0a0f1a] font-bold text-sm hover:bg-teal-300 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {loading ? 'Redirecting to checkout…' : 'Start Now — $9.95/month'}
+            {loading ? 'Redirecting to checkout…' : 'Start Now — $19.95/month'}
           </button>
         </div>
 
