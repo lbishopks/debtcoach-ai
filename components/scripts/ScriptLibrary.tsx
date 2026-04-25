@@ -76,7 +76,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
       if (!res.ok) throw new Error('Personalization failed')
       const data = await res.json()
       setPersonalizedScript(data.script)
-      toast.success('Script personalized!')
+      toast.success('Guide personalized!')
     } catch (err) {
       toast.error('Failed to personalize script')
     } finally {
@@ -89,14 +89,21 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-    toast.success('Script copied!')
+    toast.success('Copied to clipboard!')
   }
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="section-header">Script Library</h1>
-        <p className="section-subheader">Ready-to-use scripts for calling creditors, collectors, and credit bureaus</p>
+      <div className="mb-6">
+        <h1 className="section-header">Conversation Guides</h1>
+        <p className="section-subheader">General reference guides some consumers use when speaking with creditors and collectors</p>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="bg-yellow-400/5 border border-yellow-400/20 rounded-xl px-4 py-3 mb-6">
+        <p className="text-yellow-300/80 text-xs leading-relaxed">
+          <span className="font-semibold text-yellow-300">⚠️ Educational reference only.</span> These are general conversation guides based on publicly available consumer protection information — not scripts prepared by an attorney and not legal advice. What you say during a call and whether any approach is appropriate for your situation is your decision. Consult a licensed consumer rights attorney before invoking legal rights or taking formal action.
+        </p>
       </div>
 
       {/* Search & Filter */}
@@ -105,7 +112,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <input
             className="input pl-9"
-            placeholder="Search scripts..."
+            placeholder="Search guides..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -169,7 +176,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
       {filtered.length === 0 && (
         <div className="card text-center py-12">
           <Search className="w-10 h-10 text-white/20 mx-auto mb-3" />
-          <p className="text-white/50">No scripts match your search</p>
+          <p className="text-white/50">No guides match your search</p>
         </div>
       )}
 
@@ -221,7 +228,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
             {plan === 'free' && (
               <p className="text-white/30 text-xs">
                 <button onClick={() => setShowUpgrade(true)} className="text-teal-400 hover:underline">Upgrade to Pro</button>{' '}
-                to have AI personalize scripts with your specific debt details, creditor name, and negotiation context.
+                to have AI personalize guides with your specific debt details, creditor name, and situation context.
               </p>
             )}
 
@@ -229,7 +236,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-white/70 text-xs font-medium">
-                  {personalizedScript ? '✨ AI-Personalized Script' : 'Script Template'}
+                  {personalizedScript ? '✨ AI-Personalized Guide' : 'Reference Guide'}
                 </h4>
                 <Button size="sm" variant="secondary" onClick={copyScript} icon={copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}>
                   {copied ? 'Copied!' : 'Copy'}
@@ -250,7 +257,7 @@ export function ScriptLibrary({ plan, profile, debts }: Props) {
               </div>
               <Link href="/chat">
                 <Button size="sm" variant="secondary" icon={<ChevronRight className="w-4 h-4" />}>
-                  Ask AI Coach for help
+                  Ask Research Assistant
                 </Button>
               </Link>
             </div>

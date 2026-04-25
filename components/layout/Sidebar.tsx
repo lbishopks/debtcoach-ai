@@ -15,7 +15,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/chat', label: 'Research Assistant', icon: MessageSquare },
   { href: '/letters', label: 'Dispute Letters', icon: FileText },
-  { href: '/scripts', label: 'Script Library', icon: BookOpen },
+  { href: '/scripts', label: 'Conversation Guides', icon: BookOpen },
   { href: '/rights', label: 'Know Your Rights', icon: Shield },
   { href: '/situation', label: 'Situation Analyzer', icon: Brain },
   { href: '/dispute', label: 'Bureau Disputes', icon: Building2 },

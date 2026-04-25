@@ -23,8 +23,8 @@ const FEATURES = [
   },
   {
     icon: Phone,
-    title: 'Call Script Library',
-    desc: 'Ready-to-use scripts for settlement calls, pay-for-delete, cease & desist, and more — personalized to your situation.',
+    title: 'Conversation Guides',
+    desc: 'General reference guides some consumers use when speaking with creditors and collectors.',
     color: 'text-purple-400 bg-purple-400/10',
   },
   {
@@ -47,7 +47,7 @@ const INCLUDED = [
   'All 15 letter types (FDCPA, FCRA, SOL, and more)',
   'PDF & print-ready dispute letters',
   'Debt tracking dashboard',
-  'Call scripts & negotiation guides',
+  'Conversation guides & negotiation references',
   'Know Your Rights — all 50 states',
   'Priority support',
 ]
@@ -91,7 +91,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-white/60 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-            DebtCoach AI gives you unlimited AI coaching, professionally-referenced dispute letters, and call scripts — everything you need to know your rights and negotiate smarter.
+            DebtCoach AI gives you unlimited AI coaching, professionally-referenced dispute letters, and conversation guides — everything you need to know your rights and negotiate smarter.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -145,7 +145,7 @@ export default function LandingPage() {
               {
                 step: '03',
                 title: 'Take Action & Win',
-                desc: 'Send a dispute letter, follow a call script, or negotiate a settlement. The tools are ready — you execute.',
+                desc: 'Send a dispute letter, reference a conversation guide, or negotiate a settlement. The tools are ready — you execute.',
               },
             ].map(item => (
               <div key={item.step} className="relative bg-white/5 border border-white/10 rounded-2xl p-6 text-center">

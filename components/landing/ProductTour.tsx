@@ -214,7 +214,7 @@ function ScriptsScreen() {
   return (
     <div className="flex flex-col h-full bg-navy-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-white font-semibold text-sm">Call Script Library</p>
+        <p className="text-white font-semibold text-sm">Call Conversation Guides</p>
         <span className="text-xs text-white/40 bg-white/8 rounded-full px-2.5 py-1">8 scripts</span>
       </div>
 
@@ -294,7 +294,7 @@ const STEPS = [
   {
     id: 'scripts',
     icon: Phone,
-    tab: 'Call Scripts',
+    tab: 'Conversation Guides',
     headline: 'Ready-to-use scripts for every call scenario',
     sub: 'Personalized phone scripts for settlement offers, pay-for-delete negotiations, debt validation, and cease & desist — tailored to your specific debt.',
     Screen: ScriptsScreen,
