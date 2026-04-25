@@ -13,11 +13,16 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password.length < 8) {
       toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (!agreedToTerms) {
+      toast.error('You must agree to the Terms of Service to continue')
       return
     }
     setLoading(true)
@@ -43,7 +48,7 @@ export default function SignupPage() {
   const benefits = [
     'AI-powered debt negotiation coaching',
     'Custom dispute letters in seconds',
-    'Know your legal rights (FDCPA, FCRA)',
+    'Educational guides on FDCPA, FCRA & consumer rights',
     'Track your debt reduction journey',
   ]
 
@@ -117,17 +122,53 @@ export default function SignupPage() {
                 hint="Minimum 8 characters"
                 autoComplete="new-password"
               />
-              <Button type="submit" loading={loading} className="w-full" size="lg">
+              {/* Affirmative consent checkbox — required for arbitration enforceability */}
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative mt-0.5 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div
+                    onClick={() => setAgreedToTerms(!agreedToTerms)}
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                      agreedToTerms
+                        ? 'bg-teal-400 border-teal-400'
+                        : 'bg-transparent border-white/30 group-hover:border-white/50'
+                    }`}
+                  >
+                    {agreedToTerms && (
+                      <svg className="w-3 h-3 text-navy-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-white/50 text-xs leading-relaxed">
+                  I have read and agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-teal-400 hover:underline">
+                    Terms of Service
+                  </Link>{' '}
+                  (including the{' '}
+                  <Link href="/terms#arbitration" target="_blank" className="text-teal-400 hover:underline">
+                    mandatory arbitration agreement
+                  </Link>
+                  ) and the{' '}
+                  <Link href="/privacy" target="_blank" className="text-teal-400 hover:underline">
+                    Privacy Policy
+                  </Link>
+                  . I understand this service provides educational information only and is not legal advice.
+                </span>
+              </label>
+
+              <Button type="submit" loading={loading} className="w-full" size="lg" disabled={!agreedToTerms}>
                 Create Account →
               </Button>
             </form>
 
           </div>
-
-          <p className="text-center text-white/40 text-xs mt-4">
-            By signing up, you agree to our{' '}
-            <Link href="/privacy" className="text-teal-400 hover:underline">Privacy Policy</Link>.
-          </p>
 
           <p className="text-center text-white/50 text-sm mt-4">
             Already have an account?{' '}

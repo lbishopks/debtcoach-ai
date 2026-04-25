@@ -304,6 +304,7 @@ export default function LandingPage() {
             Not legal advice · Educational purposes only · Not a law firm · No attorney-client relationship
           </p>
           <div className="flex gap-4 text-white/40 text-xs">
+            <Link href="/terms" className="hover:text-white/70">Terms</Link>
             <Link href="/privacy" className="hover:text-white/70">Privacy</Link>
             <a href="mailto:support@thedebtcoachai.com" className="hover:text-white/70">Support</a>
           </div>
