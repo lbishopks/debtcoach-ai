@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { anthropic, DEBT_COACH_SYSTEM_PROMPT } from '@/lib/anthropic'
+import { anthropic, DEBT_COACH_SYSTEM_PROMPT, WEB_SEARCH_TOOL } from '@/lib/anthropic'
 import { createClient } from '@/lib/supabase/server'
 import { chatSchema, safeError } from '@/lib/validation'
 import { getPlanLimits } from '@/lib/platform-settings'
@@ -101,11 +101,14 @@ export async function POST(req: NextRequest) {
       realConversationId = newConv?.id || null
     }
 
-    // Stream response from Claude
+    // Stream response from Claude with web search enabled.
+    // The web_search_20250305 tool is server-side — Anthropic executes searches
+    // automatically; we only need to stream text_delta events to the client.
     const stream = await anthropic.messages.stream({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 2048,
       system: DEBT_COACH_SYSTEM_PROMPT,
+      tools: [WEB_SEARCH_TOOL],
       messages: claudeMessages,
     })
 

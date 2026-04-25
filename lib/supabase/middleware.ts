@@ -125,6 +125,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/letters') ||
     pathname.startsWith('/scripts') ||
     pathname.startsWith('/account') ||
+    pathname.startsWith('/forum') ||
     isOnboardingRoute ||
     pathname.startsWith('/admin') ||
     pathname === '/subscribe'

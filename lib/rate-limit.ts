@@ -20,9 +20,9 @@ const store = new Map<string, RateLimitWindow>()
 // Periodically purge expired entries to prevent memory growth
 setInterval(() => {
   const now = Date.now()
-  for (const [key, window] of store) {
+  store.forEach((window, key) => {
     if (now > window.resetAt) store.delete(key)
-  }
+  })
 }, 5 * 60 * 1000) // every 5 minutes
 
 export interface RateLimitOptions {
