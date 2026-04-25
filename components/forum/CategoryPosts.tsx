@@ -138,7 +138,7 @@ export function CategoryPosts({ slug }: { slug: string }) {
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-white/30">by {post.users?.full_name ?? 'Community Member'}</div>
+              <div className="mt-2 text-xs text-white/30">by {'Community Member'}</div>
             </Link>
           ))}
         </div>

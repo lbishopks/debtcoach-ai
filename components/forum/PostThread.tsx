@@ -156,7 +156,7 @@ export function PostThread({ postId }: { postId: string }) {
             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
               <User className="w-3 h-3 text-white/40" />
             </div>
-            <span>{post.users?.full_name ?? 'Community Member'}</span>
+            <span>{'Community Member'}</span>
           </div>
           <span>·</span>
           <div className="flex items-center gap-1">
@@ -192,7 +192,7 @@ export function PostThread({ postId }: { postId: string }) {
                   <div className="w-5 h-5 rounded-full bg-white/8 flex items-center justify-center">
                     <User className="w-2.5 h-2.5 text-white/30" />
                   </div>
-                  <span>{reply.users?.full_name ?? 'Community Member'}</span>
+                  <span>{'Community Member'}</span>
                 </div>
                 <span>·</span>
                 <span>{timeAgo(reply.created_at)}</span>

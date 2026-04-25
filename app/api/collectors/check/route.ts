@@ -29,25 +29,23 @@ export async function POST(req: NextRequest) {
 
     const { collector_name, collector_phone, collector_address } = parsed.data
 
-    const prompt = `You are a consumer protection research assistant. A user wants to verify whether the following debt collector is legitimate and check for any red flags.
+    const prompt = `You are a consumer protection research assistant providing general educational information only. A user wants to look up publicly available information about the following debt collector. You are NOT providing legal advice. Do not tell the user what they "should" do or recommend any legal action.
 
 Collector Name: ${collector_name}
 ${collector_phone ? `Phone: ${collector_phone}` : ''}
 ${collector_address ? `Address: ${collector_address}` : ''}
 
-Please research this collector and provide:
+Please research this collector and provide the following factual, publicly available information:
 
-1. **Legitimacy Assessment** — Is this a known, registered debt collection agency? Any licensing information you can find?
+1. **Registration & Licensing** — Is this a known, registered debt collection agency? What licensing information is publicly available?
 
-2. **CFPB Complaint History** — Have there been complaints filed against this company with the CFPB? How many, and what types?
+2. **CFPB Complaint History** — Have there been complaints filed against this company with the CFPB? How many, and what types? Link to the CFPB database.
 
-3. **Red Flags** — Any signs this could be a scam debt collector? (fake debts, phantom debt, threats, unlicensed operation, etc.)
+3. **Potential Red Flags** — Any publicly documented signs that could indicate scam or phantom debt operations (e.g., unlicensed, no public business records, known scam reports)?
 
-4. **Verification Steps** — What should the consumer do to verify this debt is real? (request debt validation letter, check state licensing, etc.)
+4. **Consumer Resources** — Link to relevant public resources: CFPB complaint portal, FTC fraud reporting, state AG consumer protection office, and the CFPB's debt collection guidance page.
 
-5. **Recommended Actions** — Based on your research, what should the consumer do next?
-
-Be factual and cite sources where possible. Use web search to find current information.`
+Be factual, cite sources, and use web search to find current information. Do not draw legal conclusions or recommend specific actions. End your response with: *This research is for general informational purposes only and is not legal advice. Consult a licensed consumer rights attorney for advice specific to your situation.*`
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',

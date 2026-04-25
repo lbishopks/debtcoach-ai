@@ -21,7 +21,7 @@ const navItems = [
   { href: '/situation', label: 'Situation Analyzer', icon: Brain },
   { href: '/dispute', label: 'Bureau Disputes', icon: Building2 },
   { href: '/tools', label: 'Debt Tools', icon: Calculator },
-  { href: '/violations', label: 'FDCPA Violations', icon: AlertTriangle },
+  { href: '/violations', label: 'Incident Tracker', icon: AlertTriangle },
   { href: '/collectors', label: 'Collector Checker', icon: Search },
   { href: '/practice', label: 'Practice Simulator', icon: Dumbbell },
   { href: '/forum', label: 'Community Forum', icon: Users, badge: 'Pro' },

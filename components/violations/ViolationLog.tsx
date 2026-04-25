@@ -14,20 +14,20 @@ interface Violation {
   created_at: string
 }
 
-const VIOLATION_TYPES = [
-  'Calling before 8am or after 9pm',
-  'Calling at work after being told not to',
-  'Using abusive, obscene, or threatening language',
-  'Misrepresenting the debt amount',
-  'Claiming to be an attorney without being one',
-  'Threatening arrest or criminal action',
-  'Contacting third parties without permission',
-  'Failing to send validation notice within 5 days',
-  'Continuing collection after debt disputed',
-  'Reporting false information to credit bureau',
-  'Charging unauthorized fees or interest',
-  'Refusing to identify themselves as a collector',
-  'Other FDCPA violation',
+const INCIDENT_TYPES = [
+  'Called before 8am or after 9pm',
+  'Called at work after being told not to',
+  'Used abusive, obscene, or threatening language',
+  'Misrepresented the debt amount',
+  'Claimed to be an attorney',
+  'Threatened arrest or criminal action',
+  'Contacted third parties',
+  'Did not send validation notice within 5 days',
+  'Continued contact after debt was disputed in writing',
+  'Reported potentially inaccurate information to credit bureau',
+  'Charged fees or interest beyond the agreement',
+  'Refused to identify themselves as a collector',
+  'Other concerning behavior',
 ]
 
 const STATUS_CONFIG = {
@@ -131,15 +131,15 @@ export function ViolationLog() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">FDCPA Violation Log</h1>
-          <p className="text-white/50 text-sm mt-1">Track illegal debt collector behavior. Each violation is worth $100–$1,000 in damages.</p>
+          <h1 className="text-2xl font-bold text-white">Collector Incident Tracker</h1>
+          <p className="text-white/50 text-sm mt-1">Document potential FDCPA concerns for your own records. Whether conduct constitutes a legal violation is for a licensed attorney to determine.</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 bg-teal-400 hover:bg-teal-300 text-[#0F1C2E] font-semibold px-4 py-2.5 rounded-xl transition-all text-sm"
         >
           <Plus className="w-4 h-4" />
-          Log Violation
+          Log Incident
         </button>
       </div>
 
@@ -176,7 +176,7 @@ export function ViolationLog() {
         </div>
       )}
 
-      {/* Add Violation Form */}
+      {/* Add Incident Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white/5 border border-teal-400/20 rounded-2xl p-6 space-y-4">
           <h2 className="text-white font-semibold text-lg">Log New Violation</h2>
@@ -201,7 +201,7 @@ export function ViolationLog() {
               />
             </div>
             <div>
-              <label className="label">Violation Type *</label>
+              <label className="label">Incident Type *</label>
               <select
                 className="input"
                 value={form.violation_type}
@@ -209,7 +209,7 @@ export function ViolationLog() {
                 required
               >
                 <option value="">Select violation type...</option>
-                {VIOLATION_TYPES.map(t => (
+                {INCIDENT_TYPES.map(t => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>

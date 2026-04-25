@@ -38,7 +38,7 @@ const SCENARIOS = [
   {
     id: 'harassment',
     title: 'Handle Collector Harassment',
-    description: 'Practice standing up to aggressive, borderline-illegal collector tactics.',
+    description: 'Practice staying calm and assertive with aggressive collector tactics in this educational exercise.',
     icon: '🛡️',
     difficulty: 'Advanced',
     difficultyColor: 'text-red-400 bg-red-400/10',
@@ -383,6 +383,11 @@ export function PracticeSimulator() {
           <h1 className="text-2xl font-bold text-white">Negotiation Practice Simulator</h1>
           <p className="text-white/50 text-sm mt-1">
             AI role-play with voice. The collector speaks to you — respond by mic or keyboard.
+          </p>
+        </div>
+        <div className="bg-amber-400/8 border border-amber-400/25 rounded-xl px-4 py-3">
+          <p className="text-amber-300/90 text-xs leading-relaxed">
+            <span className="font-semibold text-amber-300">⚖️ Educational exercise only:</span> This simulator is a communication skills practice tool — not legal advice. Scenarios are fictional. Coaching feedback is general educational information, not guidance on any real dispute. What you say to an actual debt collector in your real situation should be based on advice from a licensed attorney.
           </p>
         </div>
         <div className="bg-teal-400/5 border border-teal-400/20 rounded-xl px-4 py-3">
