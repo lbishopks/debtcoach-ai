@@ -29,8 +29,8 @@ const FEATURES = [
   },
   {
     icon: Shield,
-    title: 'Know Your Legal Rights',
-    desc: 'Plain-English breakdowns of FDCPA, FCRA, and statute of limitations for all 50 states so collectors can\'t intimidate you.',
+    title: 'Know Your Rights',
+    desc: 'Plain-English educational breakdowns of FDCPA, FCRA, and statute of limitations for all 50 states — for informational purposes only.',
     color: 'text-red-400 bg-red-400/10',
   },
   {
@@ -144,8 +144,8 @@ export default function LandingPage() {
               },
               {
                 step: '03',
-                title: 'Take Action & Win',
-                desc: 'Send a dispute letter, reference a conversation guide, or negotiate a settlement. The tools are ready — you execute.',
+                title: 'Take Action',
+                desc: 'Send a dispute letter, reference a conversation guide, or prepare for a settlement discussion. The tools are ready — you decide how to use them.',
               },
             ].map(item => (
               <div key={item.step} className="relative bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
@@ -167,8 +167,8 @@ export default function LandingPage() {
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything You Need to Win</h2>
-            <p className="text-white/50 max-w-xl mx-auto">Built by consumer rights experts. Powered by Claude AI. Every feature included at $19.95/month.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything You Need to Take Control</h2>
+            <p className="text-white/50 max-w-xl mx-auto">Educational tools powered by Claude AI. Every feature included at $19.95/month.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -249,7 +249,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { stat: '$1,000', label: 'Maximum FDCPA fine a collector owes YOU per violation — DebtCoach AI helps you spot them' },
+              { stat: '$1,000', label: 'Maximum statutory damages per FDCPA violation — learn about your rights as a consumer through our educational resources' },
               { stat: '15+', label: 'Dispute letter types included — debt validation, FCRA errors, cease & desist, pay-for-delete, and more' },
               { stat: '50', label: 'States covered with plain-English statute of limitations breakdowns so you know when debt is time-barred' },
             ].map(item => (
