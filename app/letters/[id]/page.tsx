@@ -3,7 +3,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Save, CheckCircle, Copy, Download,
-  Printer, Mail, Loader2, FileText, CheckCheck, AlertTriangle
+  Printer, Mail, Loader2, FileText, CheckCheck, AlertTriangle,
+  Package, Calendar, MessageSquare, Send
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -14,6 +15,12 @@ interface Letter {
   creditor_name: string
   content: string
   created_at: string
+  sent_at?: string | null
+  sent_method?: string | null
+  usps_tracking?: string | null
+  response_deadline?: string | null
+  response_received_at?: string | null
+  response_notes?: string | null
 }
 
 const typeLabel = (t: string) => t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -123,6 +130,12 @@ export default function LetterEditPage() {
   const [showApproval, setShowApproval] = useState(false)
   const [copied, setCopied] = useState(false)
   const [emailing, setEmailing] = useState(false)
+  const [tracking, setTracking] = useState({
+    sent_at: '', sent_method: '', usps_tracking: '',
+    response_deadline: '', response_received_at: '', response_notes: '',
+  })
+  const [savingTracking, setSavingTracking] = useState(false)
+  const [showTracking, setShowTracking] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -132,6 +145,15 @@ export default function LetterEditPage() {
         if (d.letter) {
           setLetter(d.letter)
           setContent(d.letter.content)
+          setTracking({
+            sent_at: d.letter.sent_at ? d.letter.sent_at.split('T')[0] : '',
+            sent_method: d.letter.sent_method || '',
+            usps_tracking: d.letter.usps_tracking || '',
+            response_deadline: d.letter.response_deadline || '',
+            response_received_at: d.letter.response_received_at ? d.letter.response_received_at.split('T')[0] : '',
+            response_notes: d.letter.response_notes || '',
+          })
+          if (d.letter.sent_at) setShowTracking(true)
         } else {
           toast.error('Letter not found')
           router.push('/letters')
@@ -203,6 +225,28 @@ export default function LetterEditPage() {
 </body>
 </html>`)
     win.document.close()
+  }
+
+  const handleSaveTracking = async () => {
+    setSavingTracking(true)
+    try {
+      const payload: Record<string, string | null> = {
+        sent_at: tracking.sent_at ? new Date(tracking.sent_at).toISOString() : null,
+        sent_method: tracking.sent_method || null,
+        usps_tracking: tracking.usps_tracking || null,
+        response_deadline: tracking.response_deadline || null,
+        response_received_at: tracking.response_received_at ? new Date(tracking.response_received_at).toISOString() : null,
+        response_notes: tracking.response_notes || null,
+      }
+      const res = await fetch(`/api/letters/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error()
+      toast.success('Tracking saved')
+    } catch { toast.error('Failed to save tracking') }
+    finally { setSavingTracking(false) }
   }
 
   const handleEmail = async () => {
@@ -334,6 +378,90 @@ export default function LetterEditPage() {
                 Email Me
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Tracking Panel — shown after approval */}
+        {approved && (
+          <div className="bg-white/4 border border-white/10 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setShowTracking(t => !t)}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-white/40" />
+                <span className="text-white/70 text-sm font-medium">Delivery Tracking</span>
+                {tracking.sent_at && (
+                  <span className="text-xs bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full">
+                    Sent {new Date(tracking.sent_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              <span className="text-white/30 text-xs">{showTracking ? '▲ Hide' : '▼ Show'}</span>
+            </button>
+            {showTracking && (
+              <div className="border-t border-white/8 px-4 py-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label text-xs">Date Sent</label>
+                    <input type="date" className="input text-sm" value={tracking.sent_at}
+                      onChange={e => setTracking(t => ({ ...t, sent_at: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="label text-xs">Send Method</label>
+                    <select className="input text-sm" value={tracking.sent_method}
+                      onChange={e => setTracking(t => ({ ...t, sent_method: e.target.value }))}>
+                      <option value="">Select...</option>
+                      <option value="certified_mail">Certified Mail w/ Return Receipt</option>
+                      <option value="regular_mail">Regular Mail</option>
+                      <option value="email">Email</option>
+                      <option value="fax">Fax</option>
+                      <option value="hand_delivered">Hand Delivered</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label text-xs">Response Deadline</label>
+                    <input type="date" className="input text-sm" value={tracking.response_deadline}
+                      onChange={e => setTracking(t => ({ ...t, response_deadline: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="label text-xs">USPS Tracking Number</label>
+                    <input className="input text-sm font-mono" value={tracking.usps_tracking}
+                      onChange={e => setTracking(t => ({ ...t, usps_tracking: e.target.value }))}
+                      placeholder="9400111899223397218495" />
+                  </div>
+                  <div>
+                    <label className="label text-xs">Response Received Date</label>
+                    <input type="date" className="input text-sm" value={tracking.response_received_at}
+                      onChange={e => setTracking(t => ({ ...t, response_received_at: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="label text-xs">Response Notes</label>
+                  <textarea className="input text-sm resize-none min-h-[70px]" value={tracking.response_notes}
+                    onChange={e => setTracking(t => ({ ...t, response_notes: e.target.value }))}
+                    placeholder="Note any response you received, what it said, next steps..." />
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={handleSaveTracking} disabled={savingTracking}
+                    className="flex items-center gap-1.5 bg-teal-400 hover:bg-teal-300 text-[#0a0f1a] font-semibold px-4 py-2 rounded-lg text-xs transition-all disabled:opacity-50">
+                    {savingTracking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    Save Tracking
+                  </button>
+                  {tracking.usps_tracking && (
+                    <a
+                      href={`https://tools.usps.com/go/TrackConfirmAction?tLabels=${tracking.usps_tracking}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-xs text-teal-400 hover:text-teal-300 underline"
+                    >
+                      Track on USPS.com →
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

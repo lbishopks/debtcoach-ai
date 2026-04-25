@@ -126,6 +126,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/scripts') ||
     pathname.startsWith('/account') ||
     pathname.startsWith('/forum') ||
+    pathname.startsWith('/violations') ||
+    pathname.startsWith('/collectors') ||
+    pathname.startsWith('/practice') ||
     isOnboardingRoute ||
     pathname.startsWith('/admin') ||
     pathname === '/subscribe'

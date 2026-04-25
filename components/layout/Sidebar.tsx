@@ -4,7 +4,8 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, MessageSquare, FileText, BookOpen,
   Shield, Settings, LogOut, Zap, Menu, X, CreditCard,
-  Brain, Building2, Calculator, Users
+  Brain, Building2, Calculator, Users, AlertTriangle,
+  Search, Dumbbell
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -13,14 +14,17 @@ import { useState } from 'react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/chat', label: 'Research Assistant', icon: MessageSquare },
+  { href: '/chat', label: 'Research Assistant', icon: MessageSquare, badge: 'Web' },
   { href: '/letters', label: 'Dispute Letters', icon: FileText },
   { href: '/scripts', label: 'Conversation Guides', icon: BookOpen },
   { href: '/rights', label: 'Know Your Rights', icon: Shield },
   { href: '/situation', label: 'Situation Analyzer', icon: Brain },
   { href: '/dispute', label: 'Bureau Disputes', icon: Building2 },
   { href: '/tools', label: 'Debt Tools', icon: Calculator },
-  { href: '/forum', label: 'Community Forum', icon: Users },
+  { href: '/violations', label: 'FDCPA Violations', icon: AlertTriangle },
+  { href: '/collectors', label: 'Collector Checker', icon: Search },
+  { href: '/practice', label: 'Practice Simulator', icon: Dumbbell },
+  { href: '/forum', label: 'Community Forum', icon: Users, badge: 'Pro' },
 ]
 
 const bottomItems = [
@@ -96,10 +100,10 @@ export function Sidebar({ plan = 'free' }: SidebarProps) {
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 {item.label}
-                {item.href === '/chat' && (
+                {item.badge === 'Web' && (
                   <span className="ml-auto text-xs bg-teal-400/20 text-teal-300 px-1.5 py-0.5 rounded-md">Web</span>
                 )}
-                {item.href === '/forum' && (
+                {item.badge === 'Pro' && (
                   <span className="ml-auto text-xs bg-purple-400/20 text-purple-300 px-1.5 py-0.5 rounded-md">Pro</span>
                 )}
               </Link>
