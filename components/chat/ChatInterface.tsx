@@ -406,8 +406,28 @@ function MarkdownContent({ content }: { content: string }) {
       prose-ol:my-2
       prose-code:bg-white/10 prose-code:px-1 prose-code:rounded prose-code:text-teal-300
       prose-blockquote:border-teal-400 prose-blockquote:text-white/60
+      prose-a:text-teal-400 prose-a:underline prose-a:decoration-teal-400/40
+      hover:prose-a:text-teal-300 hover:prose-a:decoration-teal-300/60
     ">
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown
+        components={{
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-teal-400 underline decoration-teal-400/40 hover:text-teal-300 hover:decoration-teal-300/60 transition-colors"
+            >
+              {children}
+              <svg className="inline-block ml-0.5 mb-0.5 w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   )
 }
