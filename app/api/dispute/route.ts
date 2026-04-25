@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, BUREAU_DISPUTE_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { disputeSchema, sanitize, safeNumber, safeError } from '@/lib/validation'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 const BUREAU_ADDRESSES: Record<string, { name: string; address: string; online: string }> = {
   equifax: {
@@ -154,6 +155,7 @@ Use the consumer's REAL name and address from the Sender section above — do no
       })
     }
 
+    logActivity(user.id, 'dispute_generated', { bureau: body.bureau })
     return NextResponse.json({ letters, bureaus: bureausToDispute })
   } catch (err: any) {
     return safeError(err, 'dispute')

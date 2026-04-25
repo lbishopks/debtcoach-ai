@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { chatSchema, safeError } from '@/lib/validation'
 import { getPlanLimits } from '@/lib/platform-settings'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 export async function POST(req: NextRequest) {
   try {
@@ -142,6 +143,12 @@ export async function POST(req: NextRequest) {
         } catch (saveErr) {
           console.error('Failed to save conversation:', saveErr)
         }
+
+        // Log activity
+        logActivity(user.id, 'chat', {
+          conversation_id: realConversationId,
+          message_count: messages.length,
+        })
 
         // Increment usage after a successful AI response (for all limited plans)
         if (messagesLimit !== -1) {

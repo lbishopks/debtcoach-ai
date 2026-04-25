@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, SITUATION_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { situationSchema, sanitize, safeError } from '@/lib/validation'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 export async function POST(req: NextRequest) {
   try {
@@ -82,6 +83,7 @@ Provide a general educational overview of options and resources available to con
 
     const analysis = message.content[0].type === 'text' ? message.content[0].text : ''
 
+    logActivity(user.id, 'situation_analyzed', {})
     return NextResponse.json({ analysis })
   } catch (err: any) {
     return safeError(err, 'situation')

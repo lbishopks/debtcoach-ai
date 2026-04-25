@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { anthropic, SCRIPTS_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { sanitize, safeNumber, safeError } from '@/lib/validation'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,6 +78,7 @@ Personalization Instructions:
 
     const script = message.content[0].type === 'text' ? message.content[0].text : scriptTemplate
 
+    logActivity(user.id, 'guide_personalized', { script_title: body.scriptTitle })
     return NextResponse.json({ script })
   } catch (err: any) {
     return safeError(err, 'scripts')

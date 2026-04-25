@@ -4,7 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Loader2, Mail, Calendar, CreditCard, Shield,
   Trash2, RotateCcw, Save, CheckCircle, AlertTriangle, FileText,
-  DollarSign, MessageSquare, User, ChevronDown
+  DollarSign, MessageSquare, User, ChevronDown, Activity,
+  BookOpen, Search, Users
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -21,6 +22,9 @@ interface Debt {
 }
 interface Conversation {
   id: string; title: string; created_at: string; updated_at: string
+}
+interface ActivityEntry {
+  id: string; action: string; metadata: Record<string, unknown>; created_at: string
 }
 
 const typeLabel = (t: string) => t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -59,10 +63,11 @@ export default function UserDetailPage() {
   const [letters, setLetters] = useState<Letter[]>([])
   const [debts, setDebts] = useState<Debt[]>([])
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [activity, setActivity] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
-  const [activeTab, setActiveTab] = useState<'letters' | 'debts' | 'conversations'>('letters')
+  const [activeTab, setActiveTab] = useState<'activity' | 'letters' | 'debts' | 'conversations'>('activity')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [resetLink, setResetLink] = useState('')
 
@@ -75,13 +80,15 @@ export default function UserDetailPage() {
   }
 
   useEffect(() => {
-    fetch(`/api/admin/users/${userId}`)
-      .then(r => r.json())
-      .then(d => {
+    Promise.all([
+      fetch(`/api/admin/users/${userId}`).then(r => r.json()),
+      fetch(`/api/admin/activity?userId=${userId}&limit=100`).then(r => r.json()),
+    ]).then(([d, a]) => {
         setUser(d.user)
         setLetters(d.letters || [])
         setDebts(d.debts || [])
         setConversations(d.conversations || [])
+        setActivity(a.activity || [])
         setForm({
           full_name: d.user?.full_name || '',
           email: d.user?.email || '',
@@ -264,6 +271,7 @@ export default function UserDetailPage() {
           <div className="bg-white/4 border border-white/8 rounded-xl overflow-hidden">
             <div className="flex border-b border-white/8">
               {([
+                { key: 'activity', label: 'Activity', count: activity.length, icon: Activity },
                 { key: 'letters', label: 'Letters', count: letters.length, icon: FileText },
                 { key: 'debts', label: 'Debts', count: debts.length, icon: DollarSign },
                 { key: 'conversations', label: 'Conversations', count: conversations.length, icon: MessageSquare },
@@ -282,6 +290,69 @@ export default function UserDetailPage() {
             </div>
 
             <div className="divide-y divide-white/5">
+              {activeTab === 'activity' && (
+                activity.length === 0
+                  ? <div className="py-10 text-center text-white/30 text-sm">No activity recorded yet</div>
+                  : <div className="space-y-1">
+                      {activity.map(entry => {
+                        const icons: Record<string, React.ReactNode> = {
+                          chat: <MessageSquare className="w-3.5 h-3.5" />,
+                          letter_generated: <FileText className="w-3.5 h-3.5" />,
+                          guide_personalized: <BookOpen className="w-3.5 h-3.5" />,
+                          situation_analyzed: <Search className="w-3.5 h-3.5" />,
+                          dispute_generated: <Shield className="w-3.5 h-3.5" />,
+                          forum_post_created: <Users className="w-3.5 h-3.5" />,
+                          forum_reply_created: <MessageSquare className="w-3.5 h-3.5" />,
+                          subscription_started: <CreditCard className="w-3.5 h-3.5" />,
+                          subscription_cancelled: <CreditCard className="w-3.5 h-3.5" />,
+                        }
+                        const colors: Record<string, string> = {
+                          chat: 'text-teal-400 bg-teal-400/10',
+                          letter_generated: 'text-blue-400 bg-blue-400/10',
+                          guide_personalized: 'text-purple-400 bg-purple-400/10',
+                          situation_analyzed: 'text-yellow-400 bg-yellow-400/10',
+                          dispute_generated: 'text-orange-400 bg-orange-400/10',
+                          forum_post_created: 'text-green-400 bg-green-400/10',
+                          forum_reply_created: 'text-green-400 bg-green-400/10',
+                          subscription_started: 'text-teal-400 bg-teal-400/10',
+                          subscription_cancelled: 'text-red-400 bg-red-400/10',
+                        }
+                        const labels: Record<string, string> = {
+                          chat: 'Used Research Assistant',
+                          letter_generated: 'Generated a Letter',
+                          guide_personalized: 'Personalized a Conversation Guide',
+                          situation_analyzed: 'Ran Situation Analyzer',
+                          dispute_generated: 'Generated Bureau Dispute',
+                          forum_post_created: 'Created Forum Post',
+                          forum_reply_created: 'Replied in Forum',
+                          subscription_started: 'Started Subscription',
+                          subscription_cancelled: 'Cancelled Subscription',
+                        }
+                        const meta = entry.metadata
+                        const detail = meta.letter_type ? typeLabel(String(meta.letter_type)) + (meta.creditor ? ` — ${meta.creditor}` : '')
+                          : meta.script_title ? String(meta.script_title)
+                          : meta.bureau ? String(meta.bureau)
+                          : meta.title ? String(meta.title)
+                          : meta.message_count ? `${meta.message_count} messages`
+                          : ''
+                        return (
+                          <div key={entry.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/3 transition-colors">
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${colors[entry.action] || 'text-white/40 bg-white/5'}`}>
+                              {icons[entry.action] || <Activity className="w-3.5 h-3.5" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-white/80 font-medium">{labels[entry.action] || typeLabel(entry.action)}</p>
+                              {detail && <p className="text-xs text-white/35 truncate">{detail}</p>}
+                            </div>
+                            <span className="text-xs text-white/25 flex-shrink-0">
+                              {new Date(entry.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+              )}
+
               {activeTab === 'letters' && (
                 letters.length === 0
                   ? <div className="py-10 text-center text-white/30 text-sm">No letters yet</div>
@@ -346,6 +417,7 @@ export default function UserDetailPage() {
           <div className="bg-white/4 border border-white/8 rounded-xl p-4 space-y-3">
             <h2 className="text-white font-semibold text-sm">Overview</h2>
             {[
+              { label: 'Actions', value: activity.length, icon: Activity },
               { label: 'Letters', value: letters.length, icon: FileText },
               { label: 'Debts', value: debts.length, icon: DollarSign },
               { label: 'Conversations', value: conversations.length, icon: MessageSquare },

@@ -4,6 +4,7 @@ import { anthropic, LETTER_SYSTEM_PROMPT } from '@/lib/anthropic'
 import { letterSchema, sanitize, safeNumber, safeError } from '@/lib/validation'
 import { getPlanLimits } from '@/lib/platform-settings'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 const LETTER_TYPE_DESCRIPTIONS: Record<string, string> = {
   dispute: 'formal debt dispute letter challenging the validity and accuracy of the debt under FDCPA § 1692g and FCRA § 1681i, demanding validation and cessation of collection activity',

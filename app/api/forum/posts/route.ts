@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sanitize, safeError } from '@/lib/validation'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { logActivity } from '@/lib/activity-log'
 
 export async function GET(req: NextRequest) {
   try {
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) throw error
+    logActivity(user.id, 'forum_post_created', { post_id: post.id, title: title.substring(0, 80), category_id: categoryId })
     return NextResponse.json({ postId: post.id }, { status: 201 })
   } catch (err) {
     return safeError(err, 'forum-posts-POST')
