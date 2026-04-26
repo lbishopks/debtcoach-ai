@@ -249,7 +249,10 @@ export function PracticeSimulator() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch (err: any) {
-      setMicError('Microphone access denied. Allow mic in your browser settings.')
+      const isDenied = err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError'
+      setMicError(isDenied
+        ? 'Microphone access denied.'
+        : 'Could not access microphone: ' + (err?.message || 'unknown error'))
       setMicState('error')
       return
     }
@@ -473,9 +476,16 @@ export function PracticeSimulator() {
       <div className="pt-4 border-t border-white/10 mt-4 flex-shrink-0 space-y-2">
         {/* Mic error */}
         {micState === 'error' && micError && (
-          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-            <p className="text-red-300 text-xs flex-1">{micError}</p>
-            <button onClick={() => { setMicState('idle'); setMicError('') }} className="text-red-400/60 hover:text-red-400 text-xs">✕</button>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-red-300 text-xs flex-1 font-medium">{micError}</p>
+              <button onClick={() => { setMicState('idle'); setMicError('') }} className="text-red-400/60 hover:text-red-400 text-xs flex-shrink-0">✕</button>
+            </div>
+            {micError.includes('denied') && (
+              <p className="text-red-300/70 text-xs leading-relaxed">
+                To fix: click the 🔒 lock icon in your browser address bar → set <strong>Microphone</strong> to <strong>Allow</strong>, then reload the page. On Windows, also check <em>Settings → Privacy → Microphone</em>.
+              </p>
+            )}
           </div>
         )}
         {/* Interim preview */}
