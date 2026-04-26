@@ -1,6 +1,45 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// ── California geo-block ───────────────────────────────────────────────────
+// DebtCoach AI does not operate in California. Block at the middleware layer
+// as a secondary defense (primary block is the state selector at signup).
+const _geoCache = new Map<string, { region: string | null; ts: number }>()
+const GEO_CACHE_TTL = 5 * 60_000 // 5 minutes
+
+function getIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    '127.0.0.1'
+  )
+}
+
+async function isCaliforniaIp(req: NextRequest): Promise<boolean> {
+  const ip = getIp(req)
+  // Never block in local dev
+  if (!ip || ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.')) return false
+
+  const cached = _geoCache.get(ip)
+  if (cached && Date.now() - cached.ts < GEO_CACHE_TTL) {
+    return cached.region === 'CA'
+  }
+
+  try {
+    const resp = await fetch(`https://ipapi.co/${ip}/region_code/`, {
+      headers: { 'User-Agent': 'DebtCoachAI/1.0' },
+      signal: AbortSignal.timeout(2000),
+    })
+    if (!resp.ok) return false
+    const region = (await resp.text()).trim()
+    _geoCache.set(ip, { region, ts: Date.now() })
+    return region === 'CA'
+  } catch {
+    return false // fail open — signup state selector is the primary block
+  }
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 // Simple in-process cache for maintenance mode (30s TTL)
 let _maintenanceCache: { value: boolean; ts: number } | null = null
 const MAINTENANCE_CACHE_TTL = 30_000
@@ -102,6 +141,22 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+
+  // California geo-block — applied to signup and all app routes, not API/static/not-available
+  const isNotAvailable = pathname === '/not-available'
+  const isApiOrStatic = pathname.startsWith('/api/') || pathname.startsWith('/_next/')
+  if (!isNotAvailable && !isApiOrStatic && (
+    pathname === '/auth/signup' || pathname === '/subscribe' ||
+    pathname.startsWith('/dashboard') || pathname.startsWith('/chat') ||
+    pathname.startsWith('/onboarding')
+  )) {
+    const caBlock = await isCaliforniaIp(request)
+    if (caBlock) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/not-available'
+      return NextResponse.redirect(url)
+    }
+  }
 
   // Maintenance mode — bypass for admins, /maintenance page, /auth routes, and API/static assets
   const isMaintenancePage = pathname === '/maintenance'
