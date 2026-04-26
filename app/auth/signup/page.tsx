@@ -224,46 +224,31 @@ export default function SignupPage() {
                 <p className="text-white/30 text-xs mt-1">Service is not available in California.</p>
               </div>
 
-              {/* Affirmative consent checkbox — required for arbitration enforceability */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative mt-0.5 flex-shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={agreedToTerms}
-                    onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div
-                    onClick={() => setAgreedToTerms(!agreedToTerms)}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                      agreedToTerms
-                        ? 'bg-teal-400 border-teal-400'
-                        : 'bg-transparent border-white/30 group-hover:border-white/50'
-                    }`}
-                  >
-                    {agreedToTerms && (
-                      <svg className="w-3 h-3 text-navy-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className="text-white/50 text-xs leading-relaxed">
+              {/* Affirmative consent — required for arbitration enforceability */}
+              <div className="flex items-start gap-3">
+                <input
+                  id="agree-terms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 flex-shrink-0 accent-teal-400 cursor-pointer"
+                />
+                <label htmlFor="agree-terms" className="text-white/50 text-xs leading-relaxed cursor-pointer select-none">
                   I have read and agree to the{' '}
-                  <Link href="/terms" target="_blank" className="text-teal-400 hover:underline">
+                  <Link href="/terms" target="_blank" className="text-teal-400 hover:underline" onClick={e => e.stopPropagation()}>
                     Terms of Service
                   </Link>{' '}
                   (including the{' '}
-                  <Link href="/terms#arbitration" target="_blank" className="text-teal-400 hover:underline">
+                  <Link href="/terms#arbitration" target="_blank" className="text-teal-400 hover:underline" onClick={e => e.stopPropagation()}>
                     mandatory arbitration agreement
                   </Link>
                   ) and the{' '}
-                  <Link href="/privacy" target="_blank" className="text-teal-400 hover:underline">
+                  <Link href="/privacy" target="_blank" className="text-teal-400 hover:underline" onClick={e => e.stopPropagation()}>
                     Privacy Policy
                   </Link>
                   . I understand this service provides educational information only and is not legal advice.
-                </span>
-              </label>
+                </label>
+              </div>
 
               <Button
                 type="submit"
