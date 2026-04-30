@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Zap, CheckCircle, MapPin } from 'lucide-react'
+import { Zap, CheckCircle, MapPin, Mail, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const US_STATES = [
@@ -40,6 +40,8 @@ export default function SignupPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [geoBlocked, setGeoBlocked] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   // IP-based geo check on mount — secondary layer, fails open
   useEffect(() => {
@@ -78,13 +80,39 @@ export default function SignupPage() {
         },
       })
       if (error) throw error
-      router.push('/onboarding')
+      // Show email confirmation screen — do NOT redirect yet
+      setEmailSent(true)
+      setResendCooldown(60)
     } catch (err: any) {
       toast.error(err.message || 'Signup failed')
     } finally {
       setLoading(false)
     }
   }
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      })
+      if (error) throw error
+      toast.success('Confirmation email resent!')
+      setResendCooldown(60)
+    } catch (err: any) {
+      toast.error(err.message || 'Could not resend email')
+    }
+  }
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setTimeout(() => setResendCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resendCooldown])
 
   const benefits = [
     'AI-powered debt negotiation coaching',
@@ -129,6 +157,74 @@ export default function SignupPage() {
               ← Back to home
             </Link>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Email confirmation screen ──────────────────────────────────────────────
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-navy-200 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          {/* Icon */}
+          <div className="w-20 h-20 bg-teal-400/10 border border-teal-400/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <Mail className="w-10 h-10 text-teal-400" />
+          </div>
+
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-6">
+            <div className="w-8 h-8 bg-teal-400 rounded-xl flex items-center justify-center">
+              <Zap className="w-4 h-4 text-navy-200" />
+            </div>
+            <span className="font-bold text-white">DebtCoach AI</span>
+          </div>
+
+          <h1 className="text-2xl font-bold text-white mb-3">Check your email</h1>
+          <p className="text-white/60 text-sm leading-relaxed mb-2">
+            We sent a confirmation link to
+          </p>
+          <p className="text-teal-300 font-semibold text-base mb-6">{email}</p>
+
+          {/* Steps */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 mb-6 text-left space-y-3">
+            {[
+              'Open the email from DebtCoach AI',
+              'Click the "Confirm your email" button',
+              'You\'ll be taken directly to your account setup',
+            ].map((step, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-teal-400/20 text-teal-300 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  {i + 1}
+                </div>
+                <p className="text-white/60 text-sm">{step}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Spam note */}
+          <p className="text-white/30 text-xs mb-6">
+            Don&apos;t see it? Check your spam or junk folder.
+          </p>
+
+          {/* Resend */}
+          <button
+            onClick={handleResend}
+            disabled={resendCooldown > 0}
+            className="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed mb-6"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend confirmation email'}
+          </button>
+
+          <div className="border-t border-white/10 pt-5">
+            <button
+              onClick={() => setEmailSent(false)}
+              className="text-white/40 hover:text-white/70 text-xs transition-colors"
+            >
+              ← Used a different email? Go back
+            </button>
+          </div>
         </div>
       </div>
     )

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
@@ -8,6 +8,8 @@ import { US_STATES, isStateBlocked, CAUTION_STATE_DISCLAIMER } from '@/lib/state
 import { Zap, ChevronRight, ChevronLeft, CheckCircle, DollarSign, CreditCard, GraduationCap, HeartPulse, Car, HelpCircle, User, MapPin, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
+import { TosModal } from '@/components/TosModal'
+import { CURRENT_TOS_VERSION } from '@/lib/tos-version'
 
 const STEPS = ['Welcome', 'About You', 'Your Address', 'First Debt', 'Strategy']
 
@@ -71,6 +73,29 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  // TOS gate — undefined = checking, null = never accepted, string = previously accepted version
+  const [tosVersion, setTosVersion] = useState<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    const checkTos = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push('/auth/login'); return }
+        const { data } = await supabase
+          .from('users')
+          .select('tos_accepted_version')
+          .eq('id', user.id)
+          .maybeSingle()
+        setTosVersion(data?.tos_accepted_version ?? null)
+      } catch {
+        // Fail open — don't block onboarding if the check errors
+        setTosVersion(CURRENT_TOS_VERSION)
+      }
+    }
+    checkTos()
+  }, [router])
 
   // Step 1: About You
   const [fullName, setFullName] = useState('')
@@ -138,8 +163,25 @@ export default function OnboardingPage() {
     }
   }
 
+  // Still checking TOS status — show a neutral loading screen
+  if (tosVersion === undefined) {
+    return (
+      <div className="min-h-screen bg-navy-200 flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-teal-400/30 border-t-teal-400 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-navy-200 flex flex-col items-center justify-center p-4">
+      {/* TOS / Privacy acceptance gate — blocks the wizard until accepted */}
+      {tosVersion !== CURRENT_TOS_VERSION && (
+        <TosModal
+          previousVersion={tosVersion}
+          onAccepted={() => setTosVersion(CURRENT_TOS_VERSION)}
+        />
+      )}
+
       <div className="w-full max-w-lg">
         {/* Progress bar */}
         <div className="mb-8">

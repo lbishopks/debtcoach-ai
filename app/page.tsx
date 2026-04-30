@@ -5,8 +5,8 @@ import ProductTour from '@/components/landing/ProductTour'
 const FEATURES = [
   {
     icon: MessageSquare,
-    title: 'AI Negotiation Coach',
-    desc: 'Get unlimited guidance on FDCPA, FCRA, statute of limitations by state, and proven negotiation tactics — available 24/7.',
+    title: 'AI Debt Education Coach',
+    desc: 'Get unlimited educational guidance on FDCPA, FCRA, statute of limitations by state, and consumer negotiation references — available 24/7.',
     color: 'text-teal-400 bg-teal-400/10',
   },
   {
@@ -84,9 +84,9 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
-            Fight Back Against
+            Know Your Rights
             <span className="block bg-gradient-to-r from-teal-400 to-teal-200 bg-clip-text text-transparent">
-              Debt Collectors
+              With Debt Collectors
             </span>
           </h1>
 
@@ -126,7 +126,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Up and Running in Minutes</h2>
-            <p className="text-white/50">No lawyers. No paperwork. Just answers and action.</p>
+            <p className="text-white/50">No jargon. No confusion. Just clear educational resources and practical tools.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 relative">
             {/* Connector line (desktop only) */}
@@ -204,7 +204,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-white font-bold text-2xl mb-1">DebtCoach AI Pro</h3>
-                <p className="text-white/50 text-sm">Complete debt-fighting toolkit</p>
+                <p className="text-white/50 text-sm">Consumer rights education toolkit</p>
               </div>
               <div className="text-right">
                 <p className="text-5xl font-extrabold text-white">$19.95</p>
@@ -245,11 +245,11 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">The Numbers Don&apos;t Lie</h2>
-            <p className="text-white/50 max-w-xl mx-auto">Debt collectors count on you not knowing your rights. We change that.</p>
+            <p className="text-white/50 max-w-xl mx-auto">Educational resources to help you understand your consumer rights under federal law.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { stat: '$1,000', label: 'Maximum statutory damages per FDCPA violation — learn about your rights as a consumer through our educational resources' },
+              { stat: '$1,000', label: 'Per-violation statutory damages available under the FDCPA — our resources help you understand what the law says, so you can consult an attorney if you believe violations occurred' },
               { stat: '15+', label: 'Dispute letter types included — debt validation, FCRA errors, cease & desist, pay-for-delete, and more' },
               { stat: '50', label: 'States covered with plain-English statute of limitations breakdowns so you know when debt is time-barred' },
             ].map(item => (
@@ -273,7 +273,7 @@ export default function LandingPage() {
             <span className="block text-teal-400">of Your Financial Future</span>
           </h2>
           <p className="text-white/50 text-lg mb-10">
-            Stop letting debt collectors intimidate you. Know your rights, dispute errors, negotiate smarter, and build your path to financial freedom — all for $19.95/month.
+            Don&apos;t face debt collectors unprepared. Learn your rights under the FDCPA and FCRA, generate dispute letter templates, and access plain-English consumer education — all for $19.95/month.
           </p>
           <Link
             href="/auth/signup"
